@@ -25,7 +25,7 @@ h1 {
 }
 .st-emotion-cache-16txtl3 { 
     background-color: #040404; 
-    border-right: 1px solid #282828; 
+    border-right: 1px solid #0F1116; 
 }
 .st-emotion-cache-16txtl3 .st-emotion-cache-1y4p8pa { 
     color: #1DB954 !important; 
