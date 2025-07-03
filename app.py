@@ -25,7 +25,7 @@ h1 {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     border-bottom: 1px solid #535353; /* Dünne, graue Linie */
-    padding-bottom: 1rem; /* Abstand unter der Linie */
+    padding-bottom: 3rem; /* Abstand unter der Linie */
 }
 
 .st-emotion-cache-16txtl3 { 
