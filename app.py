@@ -47,7 +47,7 @@ h1 {
 }
 .st-emotion-cache-16txtl3 .st-emotion-cache-1y4p8pa { 
     color: #1DB954 !important; 
-    font-weight: 700; 
+    font-weight: 500; 
 }
 .st-emotion-cache-134d5h5 { background-color: #535353; }
 .st-emotion-cache-1ft0j9a { background-color: #1DB954; }
