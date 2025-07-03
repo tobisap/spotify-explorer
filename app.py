@@ -14,13 +14,7 @@ st.set_page_config(
 # CSS für den Spotify Dark Mode (unverändert)
 spotify_dark_mode_css = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
-
-/* KORRIGIERTE REGEL: Stellt sicher, dass die Schriftart überall angewendet wird */
-html, body, [class*="st-"], [class*="css-"] {
-    font-family: 'Poppins', sans-serif;
-}
-
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 body, .main { 
     background-color: #121212; 
     font-family: 'Montserrat', sans-serif; 
@@ -36,10 +30,11 @@ h1, h2, h3 {
     border: 1px solid #131313;
     border-radius: 10px;
     padding: 1rem;
+    font-family: 'Montserrat'
 }
 
 h1 {
-    font-weight: 700;
+    font-weight: 900;
     background: -webkit-linear-gradient(45deg, #1DB954, #FFFFFF);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
