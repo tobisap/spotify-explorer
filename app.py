@@ -78,28 +78,82 @@ st.markdown(spotify_dark_mode_css, unsafe_allow_html=True)
 # --- Daten laden ---
 @st.cache_data
 def load_data():
-    """Lädt die CSV-Datei und bereinigt die Daten für die App."""
-    try:
-        df = pd.read_parquet('data_final.parquet')
-    except FileNotFoundError:
-        st.error("FEHLER: Die Datei 'data_final.parquet' wurde nicht gefunden.")
+    """Lädt die Datei und bereinigt die Daten für die App."""
+    df = pd.DataFrame()
+    
+    # Versuche verschiedene Dateiformate zu laden
+    file_options = [
+        ('data_final.parquet', 'parquet'),
+        ('data_final.csv', 'csv'),
+        ('spotify_data.csv', 'csv'),
+        ('spotify_data.parquet', 'parquet')
+    ]
+    
+    for filename, file_type in file_options:
+        try:
+            if file_type == 'parquet':
+                df = pd.read_parquet(filename)
+                st.success(f"✅ Daten erfolgreich geladen aus: {filename}")
+                break
+            elif file_type == 'csv':
+                df = pd.read_csv(filename)
+                st.success(f"✅ Daten erfolgreich geladen aus: {filename}")
+                break
+        except FileNotFoundError:
+            continue
+        except Exception as e:
+            st.warning(f"⚠️ Fehler beim Laden von {filename}: {str(e)}")
+            continue
+    
+    if df.empty:
+        st.error("❌ FEHLER: Keine gültige Datendatei gefunden. Bitte stellen Sie sicher, dass eine der folgenden Dateien vorhanden ist:")
+        for filename, _ in file_options:
+            st.write(f"- {filename}")
         return pd.DataFrame()
     
+    # Datenbereinigung
     numeric_cols = ['year', 'danceability', 'popularity', 'tempo', 'energy', 'valence']
-    for col in numeric_cols:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors='coerce')
+    available_cols = [col for col in numeric_cols if col in df.columns]
     
-    df.dropna(subset=numeric_cols, inplace=True)
+    if not available_cols:
+        st.error("❌ FEHLER: Keine der erforderlichen Spalten gefunden!")
+        st.write("Erforderliche Spalten:", numeric_cols)
+        st.write("Verfügbare Spalten:", list(df.columns))
+        return pd.DataFrame()
+    
+    # Konvertiere numerische Spalten
+    for col in available_cols:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+    
+    # Entferne Zeilen mit fehlenden Werten in wichtigen Spalten
+    essential_cols = ['danceability', 'energy', 'valence', 'popularity']
+    essential_available = [col for col in essential_cols if col in df.columns]
+    
+    if essential_available:
+        df.dropna(subset=essential_available, inplace=True)
     
     if 'year' in df.columns:
-        df['year'] = df['year'].astype(int)
+        df['year'] = df['year'].astype(int, errors='ignore')
     
+    # Bereite Künstler-Anzeige vor
     if 'artists' in df.columns:
-        df['display_artists'] = df['artists'].str.replace(r"\[|\]|'", "", regex=True)
+        df['display_artists'] = df['artists'].astype(str).str.replace(r"\[|\]|'", "", regex=True)
+    elif 'artist' in df.columns:
+        df['display_artists'] = df['artist'].astype(str)
     else:
-        df['display_artists'] = "N/A"
-        
+        df['display_artists'] = "Unbekannter Künstler"
+    
+    # Stelle sicher, dass wir einen Song-Namen haben
+    if 'name' not in df.columns:
+        if 'title' in df.columns:
+            df['name'] = df['title']
+        elif 'song' in df.columns:
+            df['name'] = df['song']
+        else:
+            df['name'] = "Unbekannter Song"
+    
+    st.info(f"📊 {len(df)} Songs geladen mit {len(df.columns)} Attributen")
+    
     return df
 
 # --- Highscore-Funktionen ---
@@ -167,9 +221,22 @@ def initialize_game():
 
 def get_random_song(df):
     """Wählt einen zufälligen Song aus."""
-    # Filtere Songs mit Spotify-Links
-    songs_with_links = df[df['Link'].notna() | df['t'].notna()] if 'Link' in df.columns or 't' in df.columns else df
+    # Prüfe verfügbare Link-Spalten
+    link_columns = []
+    for col in ['Link', 'link', 'spotify_url', 'url', 't']:
+        if col in df.columns:
+            link_columns.append(col)
     
+    # Versuche Songs mit Links zu finden
+    songs_with_links = df.copy()
+    if link_columns:
+        # Filtere Songs die mindestens einen Link haben
+        mask = pd.Series(False, index=df.index)
+        for col in link_columns:
+            mask = mask | df[col].notna()
+        songs_with_links = df[mask]
+    
+    # Wähle aus Songs mit Links, falls vorhanden, sonst alle Songs
     if len(songs_with_links) > 0:
         return songs_with_links.sample(1).iloc[0]
     else:
@@ -229,15 +296,27 @@ if st.session_state.game_active and st.session_state.game_songs:
         st.markdown(f"**Künstler:** {song['display_artists']}")
         
         # Spotify Player
-        link_col = 'Link' if 'Link' in song and pd.notna(song['Link']) else 't' if 't' in song and pd.notna(song['t']) else None
+        link_columns = ['Link', 'link', 'spotify_url', 'url', 't']
+        link_col = None
+        
+        for col in link_columns:
+            if col in song and pd.notna(song[col]) and str(song[col]) != 'nan':
+                link_col = col
+                break
+        
         if link_col:
             try:
-                track_id = song[link_col].split('/track/')[-1].split('?')[0]
-                embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator&theme=0"
-                st.components.v1.iframe(embed_url, height=152)
-            except:
-                st.warning("Spotify-Player nicht verfügbar für diesen Song.")
-        
+                link_url = str(song[link_col])
+                if '/track/' in link_url:
+                    track_id = link_url.split('/track/')[-1].split('?')[0]
+                    embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator&theme=0"
+                    st.components.v1.iframe(embed_url, height=152)
+                else:
+                    st.warning("⚠️ Ungültiger Spotify-Link Format.")
+            except Exception as e:
+                st.warning(f"⚠️ Spotify-Player nicht verfügbar: {str(e)}")
+        else:
+            st.info("ℹ️ Kein Spotify-Link für diesen Song verfügbar.")
         st.markdown('</div>', unsafe_allow_html=True)
         
         # Schätzungen
@@ -255,18 +334,32 @@ if st.session_state.game_active and st.session_state.game_songs:
         
         # Bestätigen Button
         if st.button("✅ Schätzung bestätigen", key=f"confirm_{current_song_index}"):
+            # Sichere Attribut-Extraktion
+            actual_dance = song.get('danceability', 0.5)
+            actual_energy = song.get('energy', 0.5)
+            actual_valence = song.get('valence', 0.5)
+            actual_popularity = song.get('popularity', 50)
+            
+            # Normalisiere Werte auf 0-100 Skala
+            if actual_dance <= 1:
+                actual_dance = actual_dance * 100
+            if actual_energy <= 1:
+                actual_energy = actual_energy * 100
+            if actual_valence <= 1:
+                actual_valence = actual_valence * 100
+            
             # Berechne Punkte
-            score_dance = calculate_score(guess_dance, song['danceability'] * 100)
-            score_energy = calculate_score(guess_energy, song['energy'] * 100)
-            score_valence = calculate_score(guess_valence, song['valence'] * 100)
-            score_popularity = calculate_score(guess_popularity, song['popularity'])
+            score_dance = calculate_score(guess_dance, actual_dance)
+            score_energy = calculate_score(guess_energy, actual_energy)
+            score_valence = calculate_score(guess_valence, actual_valence)
+            score_popularity = calculate_score(guess_popularity, actual_popularity)
             
             song_total = score_dance + score_energy + score_valence + score_popularity
             
             # Speichere Ergebnis
             st.session_state.song_scores.append({
-                'song': song['name'],
-                'artist': song['display_artists'],
+                'song': song.get('name', 'Unbekannter Song'),
+                'artist': song.get('display_artists', 'Unbekannter Künstler'),
                 'scores': {
                     'Tanzbarkeit': score_dance,
                     'Energie': score_energy,
@@ -275,10 +368,10 @@ if st.session_state.game_active and st.session_state.game_songs:
                 },
                 'total': song_total,
                 'actual': {
-                    'Tanzbarkeit': song['danceability'] * 100,
-                    'Energie': song['energy'] * 100,
-                    'Positivität': song['valence'] * 100,
-                    'Popularität': song['popularity']
+                    'Tanzbarkeit': actual_dance,
+                    'Energie': actual_energy,
+                    'Positivität': actual_valence,
+                    'Popularität': actual_popularity
                 },
                 'guessed': {
                     'Tanzbarkeit': guess_dance,
