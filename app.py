@@ -221,18 +221,27 @@ else:
     song_list.insert(0, "")
     selected_song_name = st.selectbox("Wähle einen Song, um ihn abzuspielen:", options=song_list)
 
-# Ein einziges Dropdown für die Songauswahl
-    selected_option = st.selectbox("Wähle einen Song, um ihn abzuspielen:", options=song_list, key="song_select")
+# NEU: Erstelle eine kombinierte Spalte für die Anzeige im Dropdown
+    sorted_songs['display_option'] = sorted_songs['name'] + ' – ' + sorted_songs['display_artists']
     
-    if selected_option:
-        selected_song = sorted_songs[sorted_songs['display_option'] == selected_option].iloc[0]
+    song_list = [""] + sorted_songs['display_option'].tolist()
+    
+    selected_option = st.selectbox("Wähle einen Song:", options=song_list)
+    
+    if selected_song_name:
+        selected_song = filtered_df[filtered_df['name'] == selected_song_name].iloc[0]
         st.markdown(f"**Titel:** {selected_song['name']} | **Künstler:** {selected_song['display_artists']}")
         
+        # Link-Spalte prüfen
         link_col = 'Link' if 'Link' in selected_song and pd.notna(selected_song['Link']) else 't' if 't' in selected_song and pd.notna(selected_song['t']) else None
+
         if link_col:
+            # NEU: Extrahiere die Track-ID und baue den Embed-Link
             try:
                 track_id = selected_song[link_col].split('/track/')[-1].split('?')[0]
                 embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator&theme=0"
+                
+                # Zeige den Player als HTML-Komponente an
                 st.components.v1.iframe(embed_url, height=80)
             except:
                 st.warning("Der Spotify-Link für diesen Song scheint ungültig zu sein.")
