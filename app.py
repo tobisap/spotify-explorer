@@ -216,31 +216,29 @@ else:
     
     st.subheader("Song-Details anzeigen")
     
-    # Sortiere die gefilterten Songs nach Popularität für das Dropdown
+    # --- Song-Auswahl und Player-Anzeige ---
+    st.subheader("Song-Details und Player")
     sorted_songs = filtered_df.sort_values(by='popularity', ascending=False)
     song_list = sorted_songs['name'].tolist()
     song_list.insert(0, "")
-
-    selected_song_name = st.selectbox("Wähle einen Song (sortiert nach Popularität):", options=song_list)
+    selected_song_name = st.selectbox("Wähle einen Song, um ihn abzuspielen:", options=song_list)
 
     if selected_song_name:
         selected_song = filtered_df[filtered_df['name'] == selected_song_name].iloc[0]
-
-        col_info, col_button = st.columns([3, 1])
-        with col_info:
-            st.markdown(f"**Titel:** {selected_song['name']}")
-            st.markdown(f"**Künstler:** {selected_song['display_artists']}")
-
-        link_col = None
-        if 'Link' in selected_song and pd.notna(selected_song['Link']):
-            link_col = 'Link'
-        elif 't' in selected_song and pd.notna(selected_song['t']):
-            link_col = 't'
+        st.markdown(f"**Titel:** {selected_song['name']} | **Künstler:** {selected_song['display_artists']}")
+        
+        # Link-Spalte prüfen
+        link_col = 'Link' if 'Link' in selected_song and pd.notna(selected_song['Link']) else 't' if 't' in selected_song and pd.notna(selected_song['t']) else None
 
         if link_col:
-            with col_button:
-                st.write("")
-                st.link_button("Auf Spotify öffnen", selected_song[link_col])
+            # NEU: Extrahiere die Track-ID und baue den Embed-Link
+            try:
+                track_id = selected_song[link_col].split('/track/')[-1].split('?')[0]
+                embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator&theme=0"
+                
+                # Zeige den Player als HTML-Komponente an
+                st.components.v1.iframe(embed_url, height=80)
+            except:
+                st.warning("Der Spotify-Link für diesen Song scheint ungültig zu sein.")
         else:
-            with col_info:
-                st.warning("Kein Spotify-Link für diesen Song verfügbar.")
+            st.warning("Kein Spotify-Link für diesen Song verfügbar.")
