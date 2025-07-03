@@ -210,3 +210,29 @@ else:
         else:
             with col_info:
                 st.warning("Kein Spotify-Link für diesen Song verfügbar.")
+ 
+    # --- NEU: Korrelationsmatrix ---
+    st.subheader("Korrelationsmatrix der Merkmale")
+    st.write("Diese Heatmap zeigt, wie die verschiedenen Song-Eigenschaften für deine aktuelle Auswahl zusammenhängen.")
+    
+    # Wähle die relevanten Spalten für die Korrelation aus
+    corr_cols = ['danceability', 'energy', 'tempo', 'popularity', 'valence', 'year']
+    corr_df = filtered_df[corr_cols]
+    
+    # Berechne die Korrelationsmatrix
+    matrix = corr_df.corr()
+    
+    # Erstelle die Heatmap mit Plotly Express
+    fig_corr = px.imshow(
+        matrix,
+        text_auto=True, # Zeigt die Zahlenwerte in den Feldern an
+        aspect="auto",
+        color_continuous_scale='RdBu_r', # Rot-Blau-Farbskala, gut für Korrelationen
+        labels=dict(color="Korrelation")
+    )
+    fig_corr.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="#282828",
+        font_color="#FFFFFF"
+    )
+    st.plotly_chart(fig_corr, use_container_width=True)
