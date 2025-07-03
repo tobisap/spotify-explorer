@@ -316,8 +316,8 @@ def game_page(df_game):
         else:
             # --- ERGEBNISSE ANZEIGEN ---
             actual_values = {
-                'dance': int(song['danceability']),
-                'energy': int(song['energy']),
+                'dance': int(song['danceability'] / 10),
+                'energy': int(song['energy'] / 10),
                 'valence': int(song['valence'])
             }
             user_guesses = st.session_state.guesses
