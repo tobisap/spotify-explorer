@@ -281,7 +281,7 @@ def explorer_page(df_explorer):
             ]
     
     st.markdown("<br>", unsafe_allow_html=True)
-    st.header(f"Ergebnisse")
+    # st.header(f"Ergebnisse")
     if filtered_df.empty:
         st.warning("Keine Songs für die aktuelle Filterkombination gefunden.")
     else:
