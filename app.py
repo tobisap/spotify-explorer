@@ -11,6 +11,50 @@ st.set_page_config(
     layout="wide"
 )
 
+def set_blurry_background(image_url):
+    """
+    Generiert CSS, um ein unscharfes Hintergrundbild für die App zu setzen.
+    """
+    css = f"""
+    <style>
+    .stApp {{
+        background-image: url("{image_url}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }}
+
+    .stApp::before {{
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.6); /* Dunkler Überzug für bessere Lesbarkeit */
+        backdrop-filter: blur(8px); /* Der Unschärfe-Effekt */
+        z-index: 1;
+    }}
+
+    /* Stellt sicher, dass der App-Inhalt über dem Hintergrund liegt */
+    .main, .stSidebar, .stHeader {{
+        position: relative;
+        z-index: 2;
+        background: transparent; /* Macht die Standard-Hintergründe transparent */
+    }}
+    
+    /* Zusätzliche Anpassungen für bessere Lesbarkeit */
+    .st-emotion-cache-16txtl3 {{
+        background-color: rgba(4, 4, 4, 0.8) !important;
+    }}
+    [data-testid="stMetric"] {{
+         background-color: rgba(19, 19, 19, 0.8) !important;
+    }}
+    </style>
+    """
+    st.markdown(css, unsafe_allow_html=True)
+
 # CSS für den Spotify Dark Mode (unverändert)
 spotify_dark_mode_css = """
 <style>
@@ -264,6 +308,10 @@ def explorer_page(df_explorer):
 
         if selected_option:
             selected_song = sorted_songs[sorted_songs['display_option'] == selected_option].iloc[0]
+            # Annahme: Die Spalte 'album_cover_url' existiert in Ihrem DataFrame
+            if 'album_cover_url' in selected_song and pd.notna(selected_song['album_cover_url']):
+                set_blurry_background(selected_song['album_cover_url'])
+                
             track_id = selected_song['link'].split('/track/')[-1].split('?')[0]
             embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator&theme=0"
             st.components.v1.iframe(embed_url, height=150) # Haupt-Player
