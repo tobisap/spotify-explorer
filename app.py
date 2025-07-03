@@ -86,6 +86,15 @@ def load_data():
 
 df = load_data()
 
+# --- Seiten-Navigation ---
+st.sidebar.title("Navigation")
+page = st.sidebar.radio("Wähle eine Seite", ["Musik-Explorer", "Song-Quiz"])
+
+# ====================================================================================================
+# SEITE 1: MUSIK-EXPLORER
+# ====================================================================================================
+if page == "Musik-Explorer":
+    st.title("Spotify Musik-Explorer")
 # --- Hauptteil der App ---
 st.title("Spotify Musik-Explorer")
 
@@ -250,3 +259,130 @@ else:
                 st.warning("Der Spotify-Link für diesen Song scheint ungültig zu sein.")
         else:
             st.warning("Kein Spotify-Link für diesen Song verfügbar.")
+
+elif page == "Song-Quiz":
+    st.title("🎵 Song-Quiz")
+    st.info("Höre dir den Song an und schätze seine Eigenschaften. Je näher du liegst, desto mehr Punkte bekommst du!")
+
+    # --- Hilfsfunktionen für Highscore ---
+    def load_highscores():
+        try:
+            return pd.read_csv("highscores.csv")
+        except FileNotFoundError:
+            return pd.DataFrame(columns=["Name", "Score"])
+
+    def save_highscore(name, score):
+        df_scores = load_highscores()
+        new_entry = pd.DataFrame([[name, score]], columns=["Name", "Score"])
+        df_scores = pd.concat([df_scores, new_entry], ignore_index=True)
+        df_scores = df_scores.sort_values(by="Score", ascending=False).head(5)
+        df_scores.to_csv("highscores.csv", index=False)
+
+    # --- Initialisierung des Spielzustands ---
+    if 'round' not in st.session_state:
+        st.session_state.round = 0
+        st.session_state.score = 0
+        st.session_state.song_history = []
+
+    def next_song():
+        # Wähle einen neuen zufälligen Song, der noch nicht gespielt wurde
+        available_songs = df[~df.index.isin(st.session_state.song_history)]
+        if not available_songs.empty:
+            st.session_state.current_song = available_songs.sample(1)
+            st.session_state.song_history.append(st.session_state.current_song.index[0])
+            st.session_state.round += 1
+            st.session_state.guess_submitted = False
+        else:
+            st.session_state.round = 6 # Spiel vorbei, wenn keine Songs mehr da sind
+
+    def restart_game():
+        st.session_state.round = 0
+        st.session_state.score = 0
+        st.session_state.song_history = []
+
+    # --- Spiel-Logik ---
+    if st.session_state.round == 0:
+        if st.button("Neues Spiel starten"):
+            next_song()
+            st.rerun()
+
+    elif 1 <= st.session_state.round <= 5:
+        st.header(f"Runde {st.session_state.round} von 5 | Punktzahl: {st.session_state.score}")
+        
+        song = st.session_state.current_song.iloc[0]
+        st.subheader(f"{song['name']} – {song['display_artists']}")
+        
+        link_col = 'Link' if 'Link' in song and pd.notna(song['Link']) else 't' if 't' in song and pd.notna(song['t']) else None
+        if link_col:
+            try:
+                track_id = song[link_col].split('/track/')[-1].split('?')[0]
+                embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator&theme=0"
+                st.components.v1.iframe(embed_url, height=80)
+            except:
+                st.warning("Link ungültig, nächster Song wird geladen...")
+                next_song()
+                st.rerun()
+        else:
+            st.warning("Kein Link verfügbar, nächster Song wird geladen...")
+            next_song()
+            st.rerun()
+
+        st.markdown("---")
+        st.subheader("Deine Schätzung:")
+        
+        guess_dance = st.slider("Tanzbarkeit (0-100)", 0, 100, 50, key=f"d{st.session_state.round}")
+        guess_energy = st.slider("Energie (0-100)", 0, 100, 50, key=f"e{st.session_state.round}")
+        guess_valence = st.slider("Positivität (0-100)", 0, 100, 50, key=f"v{st.session_state.round}")
+        
+        if st.button("Schätzung abgeben"):
+            st.session_state.guess_submitted = True
+            
+            # Punkte berechnen
+            actual_dance = int(song['danceability'] * 100)
+            actual_energy = int(song['energy'] * 100)
+            actual_valence = int(song['valence'] * 100)
+
+            score_dance = max(0, 100 - abs(actual_dance - guess_dance))
+            score_energy = max(0, 100 - abs(actual_energy - guess_energy))
+            score_valence = max(0, 100 - abs(actual_valence - guess_valence))
+            
+            round_score = int((score_dance + score_energy + score_valence) / 3)
+            st.session_state.score += round_score
+            
+            # Ergebnisse anzeigen
+            st.subheader("Auswertung der Runde")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Tanzbarkeit", f"{actual_dance}/100", f"Deine Schätzung: {guess_dance}")
+            with col2:
+                st.metric("Energie", f"{actual_energy}/100", f"Deine Schätzung: {guess_energy}")
+            with col3:
+                st.metric("Positivität", f"{actual_valence}/100", f"Deine Schätzung: {guess_valence}")
+            
+            st.success(f"Du hast in dieser Runde {round_score} Punkte erhalten!")
+            
+        if st.session_state.get('guess_submitted', False):
+            if st.button("Nächster Song"):
+                next_song()
+                st.rerun()
+                
+    else: # Spielende
+        st.header(f"Spiel beendet! Deine Gesamtpunktzahl: {st.session_state.score}")
+        
+        name = st.text_input("Gib deinen Namen für die Highscore-Liste ein:")
+        if st.button("Highscore speichern"):
+            if name:
+                save_highscore(name, st.session_state.score)
+                st.success("Highscore gespeichert!")
+            else:
+                st.error("Bitte gib einen Namen ein.")
+        
+        if st.button("Nochmal spielen"):
+            restart_game()
+            st.rerun()
+
+    # --- Highscore-Anzeige ---
+    st.markdown("---")
+    st.header("🏆 Highscores")
+    highscores = load_highscores()
+    st.table(highscores)
