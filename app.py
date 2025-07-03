@@ -228,6 +228,46 @@ def explorer_page(df_explorer):
             embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator&theme=0"
             st.components.v1.iframe(embed_url, height=80)
 
+        st.subheader("Korrelations-Heatmap")
+        st.markdown("""
+        Diese Heatmap zeigt, wie stark die verschiedenen musikalischen Eigenschaften in den gefilterten Songs zusammenhängen. 
+        Werte nahe **1** deuten auf eine starke *positive* Korrelation hin, während Werte nahe **-1** auf eine starke *negative* Korrelation hindeuten. Werte um **0** bedeuten keinen klaren Zusammenhang.
+        """)
+
+        # Auswahl der relevanten numerischen Spalten für die Korrelation
+        corr_columns_keys = ['popularity', 'year', 'danceability', 'energy', 'valence', 'tempo']
+        existing_corr_columns = [col for col in corr_columns_keys if col in filtered_df.columns]
+        
+        if len(existing_corr_columns) > 1:
+            # Deutsche Labels für die Achsen verwenden
+            german_labels = [axis_options_german.get(key, key) for key in existing_corr_columns]
+            
+            # Korrelationsmatrix berechnen und Spalten/Index umbenennen
+            corr_matrix = filtered_df[existing_corr_columns].corr()
+            corr_matrix.columns = german_labels
+            corr_matrix.index = german_labels
+
+            # Heatmap mit Plotly Express erstellen
+            fig_corr = px.imshow(
+                corr_matrix,
+                text_auto=".2f",  # Werte in den Zellen anzeigen (auf 2 Dezimalstellen)
+                aspect="auto",
+                color_continuous_scale="Greens", # Farbskala passend zum Spotify-Theme
+                labels=dict(color="Korrelation")
+            )
+            
+            # Layout an das Dark-Mode-Theme anpassen
+            fig_corr.update_layout(
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="#131313",
+                font_color="#FFFFFF"
+            )
+            
+            st.plotly_chart(fig_corr, use_container_width=True)
+        else:
+            st.warning("Nicht genügend Daten vorhanden, um eine Korrelationsmatrix zu erstellen.")
+
+
 def game_page(df_game):
     """Rendert die Spiel-Seite."""
     st.title("Song-Quiz: Wie gut kennst du die Musik?")
