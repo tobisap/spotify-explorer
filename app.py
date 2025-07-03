@@ -41,16 +41,13 @@ h1 {
     border-bottom: 1px solid #535353;
     padding-bottom: 4rem;
 }
-h2 {
-    font-weight: 300;
-}
 .st-emotion-cache-16txtl3 { 
     background-color: #040404; 
     border-right: 1px solid #282828; 
 }
 .st-emotion-cache-16txtl3 .st-emotion-cache-1y4p8pa { 
     color: #1DB954 !important; 
-    font-weight: 500; 
+    font-weight: 400; 
 }
 .st-emotion-cache-134d5h5 { background-color: #535353; }
 .st-emotion-cache-1ft0j9a { background-color: #1DB954; }
@@ -64,7 +61,7 @@ h2 {
     color: #FFFFFF;
     border-radius: 500px;
     padding: 10px 25px;
-    font-weight: 700;
+    font-weight: 400;
     border: none;
     text-decoration: none;
     display: inline-block;
