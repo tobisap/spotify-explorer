@@ -41,6 +41,9 @@ h1 {
     border-bottom: 1px solid #535353;
     padding-bottom: 4rem;
 }
+h2 {
+    font-weight: 400;
+}
 .st-emotion-cache-16txtl3 { 
     background-color: #040404; 
     border-right: 1px solid #282828; 
