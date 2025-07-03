@@ -1,3 +1,5 @@
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics.pairwise import euclidean_distances
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -116,6 +118,28 @@ def load_data():
         
     return df
 
+df = load_data()
+if df is None:
+    st.stop()
+
+# FÜGEN SIE DIESE FUNKTION HIER EIN
+@st.cache_data
+def prepare_ai_data(df):
+    """Bereitet die Daten für die Ähnlichkeitssuche vor."""
+    feature_cols = ['danceability', 'energy', 'valence', 'tempo', 'popularity', 'year']
+    
+    # Sicherstellen, dass nur existierende Spalten verwendet werden
+    existing_features = [col for col in feature_cols if col in df.columns]
+    ai_df = df.set_index('name')[existing_features].copy() # Wichtig: 'name' als Index setzen
+    
+    # Skalieren der Features
+    scaler = StandardScaler()
+    scaled_features = scaler.fit_transform(ai_df)
+    
+    return scaled_features, ai_df.index # Den neuen Index zurückgeben
+
+
+# --- DATENLADEN ---
 df = load_data()
 if df is None:
     st.stop()
