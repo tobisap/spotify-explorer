@@ -318,7 +318,7 @@ def explorer_page(df_explorer):
             selected_song = sorted_songs[sorted_songs['display_option'] == selected_option].iloc[0]
             track_id = selected_song['link'].split('/track/')[-1].split('?')[0]
             embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator&theme=0"
-            st.components.v1.iframe(embed_url, height=200) # Haupt-Player
+            st.components.v1.iframe(embed_url, height=300) # Haupt-Player
 
             # --- NEU: ANZEIGE DER SONG-ATTRIBUTE IN KACHELN ---
             st.markdown("---")
@@ -448,7 +448,7 @@ def game_page(df_game):
         try:
             track_id = song['link'].split('/track/')[-1].split('?')[0]
             embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator&theme=0"
-            st.components.v1.iframe(embed_url, height=152)
+            st.components.v1.iframe(embed_url, height=200)
         except Exception:
             st.error("Song konnte nicht geladen werden. Nächste Runde wird gestartet.")
             # Nächste Runde erzwingen
