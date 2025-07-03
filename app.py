@@ -161,9 +161,23 @@ def explorer_page(df_explorer):
         end_decade = int(end_decade_str.replace('er', ''))
         filtered_df = filtered_df[(filtered_df['decade'] >= start_decade) & (filtered_df['decade'] <= end_decade)]
 
-    # Weitere Filter... (Tanzbarkeit, Popularität, Tempo)
-    # Diese Filter sind identisch zum Originalcode und werden hier der Kürze halber nicht wiederholt
-    # Der Code funktioniert aber, wenn er hier eingefügt wird.
+    if 'danceability' in filtered_df.columns:
+    dance_range = st.sidebar.slider("Tanzbarkeit (0-100)", 0, 100, (0, 100), key="dance_slider")
+    min_dance = dance_range[0] / 100.0
+    max_dance = dance_range[1] / 100.0
+    filtered_df = filtered_df[(filtered_df['danceability'] >= min_dance) & (filtered_df['danceability'] <= max_dance)]
+    
+    if 'popularity' in filtered_df.columns:
+    val = st.sidebar.slider("Popularität", 0, 100, (0, 100), key="pop_slider")
+    filtered_df = filtered_df[(filtered_df['popularity'] >= val[0]) & (filtered_df['popularity'] <= val[1])]
+    
+    if 'tempo' in filtered_df.columns:
+    min_t = int(df['tempo'].min() // 5 * 5)
+    max_t = int(df['tempo'].max() // 5 * 5) + 5
+    val = st.sidebar.slider("Tempo (BPM)", min_t, max_t, (min_t, max_t), step=5, key="tempo_slider")
+    filtered_df = filtered_df[(filtered_df['tempo'] >= val[0]) & (filtered_df['tempo'] <= val[1])]
+
+
     
     st.header(f"Gefilterte Ergebnisse")
     if filtered_df.empty:
