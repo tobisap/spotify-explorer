@@ -14,11 +14,11 @@ st.set_page_config(
 # CSS für den Spotify Dark Mode (unverändert)
 spotify_dark_mode_css = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap');
 
 /* KORRIGIERTE REGEL: Stellt sicher, dass die Schriftart überall angewendet wird */
 html, body, [class*="st-"], [class*="css-"] {
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Outfit', sans-serif;
 }
 
 body, .main { 
