@@ -72,6 +72,56 @@ h1 {
     color: #FFFFFF !important;
     border: none;
 }
+/* --- Modernes Slider-Design im Apple-Stil --- */
+
+/* Hauptcontainer des Sliders */
+[data-testid="stSlider"] {
+    padding-top: 15px; /* Etwas Platz nach oben schaffen */
+}
+
+/* Der Schieberegler-Balken (Track) für Webkit-Browser (Chrome, Safari) */
+[data-testid="stSlider"] .st-emotion-cache-134d5h5 {
+    background: #444444; /* Dunkelgrauer Balken */
+    height: 4px; /* Dünnerer Balken */
+    border-radius: 2px;
+}
+
+/* Der farbige Teil des Balkens (Fill) */
+[data-testid="stSlider"] .st-emotion-cache-1ft0j9a {
+    background: #1DB954; /* Spotify-Grün */
+    height: 4px;
+    border-radius: 2px;
+}
+
+/* Der runde Anfasser (Thumb) für Webkit-Browser */
+[data-testid="stSlider"] .st-emotion-cache-134d5h5::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Standard-Aussehen entfernen */
+    appearance: none;
+    width: 20px; /* Größe des Anfassers */
+    height: 20px;
+    border-radius: 50%; /* Rund machen */
+    background: #FFFFFF; /* Weißer Anfasser */
+    cursor: pointer;
+    margin-top: -8px; /* Zentriert den Anfasser auf dem dünnen Balken */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3); /* Leichter Schatten */
+    transition: transform 0.1s ease-in-out; /* Sanfte Animation */
+}
+
+/* Leichte Vergrößerung beim Klicken */
+[data-testid="stSlider"] .st-emotion-cache-134d5h5::-webkit-slider-thumb:active {
+    transform: scale(1.1);
+}
+
+/* Dasselbe für Mozilla Firefox */
+[data-testid="stSlider"] .st-emotion-cache-134d5h5::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
 </style>
 """
 st.markdown(spotify_dark_mode_css, unsafe_allow_html=True)
