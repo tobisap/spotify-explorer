@@ -228,7 +228,6 @@ def explorer_page(df_explorer):
             embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator&theme=0"
             st.components.v1.iframe(embed_url, height=80)
 
-        st.write("") 
         st.markdown("---")
         st.write("") 
         with st.expander("Korrelations-Heatmap anzeigen"):
