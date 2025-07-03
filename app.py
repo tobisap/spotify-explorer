@@ -30,7 +30,7 @@ h1, h2, h3 {
     border: 1px solid #131313;
     border-radius: 10px;
     padding: 1rem;
-    font-family: 'Montserrat'
+    font-family: 'Outfit'
 }
 
 h1 {
