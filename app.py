@@ -194,8 +194,11 @@ def save_highscores(scores):
 
 def explorer_page(df_explorer):
     """Rendert die Explorer-Seite."""
+
+    # HIER fügen Sie die Funktion ein
     def reset_filters():
         """Setzt alle Filter im Session State zurück."""
+        # Liste aller Schlüssel, die zu den Filtern gehören
         filter_keys = [
             "song_search", "decade_slider", "dance_range", 
             "popularity_range", "tempo_range", "duration_range"
