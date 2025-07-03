@@ -99,7 +99,7 @@ def load_data():
         
     df.dropna(subset=['link'], inplace=True) # Songs ohne Link entfernen
 
-    numeric_cols = ['year', 'danceability', 'popularity', 'tempo', 'energy', 'valence']
+    numeric_cols = ['year', 'danceability', 'popularity', 'tempo', 'energy', 'valence', 'duration_ms']
     for col in numeric_cols:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors='coerce')
@@ -113,6 +113,10 @@ def load_data():
         df['display_artists'] = df['artists'].str.replace(r"\[|\]|'", "", regex=True)
     else:
         df['display_artists'] = "N/A"
+        
+    if 'duration_ms' in df.columns:
+        df['duration_s'] = df['duration_ms'] / 1000
+        df.dropna(subset=['duration_s'], inplace=True)
         
     return df
 
@@ -207,6 +211,22 @@ def explorer_page(df_explorer):
         (filtered_df['tempo'] >= tempo_range[0]) & 
         (filtered_df['tempo'] <= tempo_range[1])
     ]
+    
+    if 'duration_s' in filtered_df.columns and not filtered_df.empty:
+        min_duration = int(filtered_df['duration_s'].min())
+        max_duration = int(filtered_df['duration_s'].max())
+        
+        duration_range = st.sidebar.slider(
+            "Liedlänge (Sekunden)",
+            min_value=min_duration,
+            max_value=max_duration,
+            value=(min_duration, max_duration),
+            step=10  # Schritte in 10-Sekunden-Intervallen
+        )
+        filtered_df = filtered_df[
+            (filtered_df['duration_s'] >= duration_range[0]) & 
+            (filtered_df['duration_s'] <= duration_range[1])
+        ]
     
     st.header(f"Gefilterte Ergebnisse")
     if filtered_df.empty:
