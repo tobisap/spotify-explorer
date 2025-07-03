@@ -302,7 +302,7 @@ def explorer_page(df_explorer):
         fig = px.scatter(filtered_df, x=x_axis_key, y=y_axis_key, color="popularity",
                          color_continuous_scale=["#FFFFFF", "#1DB954"], size="popularity", size_max=60,
                          hover_name="name", hover_data=['display_artists'])
-        fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#131313", font_color="#FFFFFF")
+        fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#131313", font_color="#FFFFFF", height=600)
         st.plotly_chart(fig, use_container_width=True)
 
         # --- Song-Auswahl und Player ---
