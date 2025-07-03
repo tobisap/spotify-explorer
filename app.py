@@ -84,44 +84,46 @@ if df.empty:
 
 # --- Seitenleiste mit Filtern ---
 st.sidebar.header("Filter")
+
+# NEU: Songsuche ganz oben
+search_term = st.sidebar.text_input("Songsuche", key="song_search")
+
 filtered_df = df.copy()
 
-if 'decade' in filtered_df.columns:
+# Wende zuerst die Songsuche an, falls ein Begriff eingegeben wurde
+if search_term:
+    # `case=False` ignoriert Groß- und Kleinschreibung
+    filtered_df = filtered_df[filtered_df['name'].str.contains(search_term, case=False, na=False)]
+
+
+# Die restlichen Filter werden auf das (möglicherweise schon durch die Suche verkleinerte) Set angewendet
+if 'decade' in filtered_df.columns and len(filtered_df['decade'].unique()) > 1:
     decades = sorted(filtered_df['decade'].unique())
     decade_options = [f"{decade}er" for decade in decades]
     start_decade_str, end_decade_str = st.sidebar.select_slider(
-        "Jahrzehnt",
-        options=decade_options,
-        value=(decade_options[max(0, len(decade_options) - 4)], decade_options[-1]),
-        key="decade_slider"  # Eindeutiger Schlüssel
+        "Jahrzehnt", 
+        options=decade_options, 
+        value=(decade_options[0], decade_options[-1]),
+        key="decade_slider"
     )
     start_decade = int(start_decade_str.replace('er', ''))
     end_decade = int(end_decade_str.replace('er', ''))
     filtered_df = filtered_df[(filtered_df['decade'] >= start_decade) & (filtered_df['decade'] <= end_decade)]
 
 if 'danceability' in filtered_df.columns:
-    dance_range = st.sidebar.slider(
-        "Tanzbarkeit (0-100)", 0, 100, (0, 100),
-        key="danceability_slider"  # Eindeutiger Schlüssel
-    )
+    dance_range = st.sidebar.slider("Tanzbarkeit (0-100)", 0, 100, (0, 100), key="dance_slider")
     min_dance = dance_range[0] / 100.0
     max_dance = dance_range[1] / 100.0
     filtered_df = filtered_df[(filtered_df['danceability'] >= min_dance) & (filtered_df['danceability'] <= max_dance)]
 
 if 'popularity' in filtered_df.columns:
-    val = st.sidebar.slider(
-        "Popularität", 0, 100, (0, 100),
-        key="popularity_slider"  # Eindeutiger Schlüssel
-    )
+    val = st.sidebar.slider("Popularität", 0, 100, (0, 100), key="pop_slider")
     filtered_df = filtered_df[(filtered_df['popularity'] >= val[0]) & (filtered_df['popularity'] <= val[1])]
 
 if 'tempo' in filtered_df.columns:
     min_t = int(df['tempo'].min() // 5 * 5)
     max_t = int(df['tempo'].max() // 5 * 5) + 5
-    val = st.sidebar.slider(
-        "Tempo (BPM)", min_t, max_t, (min_t, max_t), step=5,
-        key="tempo_slider"  # Eindeutiger Schlüssel
-    )
+    val = st.sidebar.slider("Tempo (BPM)", min_t, max_t, (min_t, max_t), step=5, key="tempo_slider")
     filtered_df = filtered_df[(filtered_df['tempo'] >= val[0]) & (filtered_df['tempo'] <= val[1])]
 
 # --- Haupt-Ansicht auf der Seite ---
