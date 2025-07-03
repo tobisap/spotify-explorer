@@ -73,6 +73,12 @@ def load_data():
         df['year'] = df['year'].astype(int)
         df['decade'] = (df['year'] // 10) * 10
 
+    # Die Spalte 'display_artists' wird hier erstellt.
+    if 'artists' in df.columns:
+        df['display_artists'] = df['artists'].str.replace(r"\[|\]|'", "", regex=True)
+    else:
+        df['display_artists'] = "N/A"
+        
     return df
 
 
