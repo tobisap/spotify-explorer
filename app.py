@@ -42,7 +42,7 @@ h1 {
     padding-bottom: 4rem;
 }
 h2 {
-    font-weight: 400;
+    font-weight: 300;
 }
 .st-emotion-cache-16txtl3 { 
     background-color: #040404; 
