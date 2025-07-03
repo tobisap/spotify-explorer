@@ -229,10 +229,10 @@ def explorer_page(df_explorer):
             st.components.v1.iframe(embed_url, height=80)
 
         with st.expander("Korrelations-Heatmap anzeigen"):
-        st.markdown("""
-        Diese Heatmap zeigt, wie stark die verschiedenen musikalischen Eigenschaften in den gefilterten Songs zusammenhängen. 
-        Werte nahe **1** deuten auf eine starke *positive* Korrelation hin, während Werte nahe **-1** auf eine starke *negative* Korrelation hindeuten. Werte um **0** bedeuten keinen klaren Zusammenhang.
-        """)
+            st.markdown("""
+            Diese Heatmap zeigt, wie stark die verschiedenen musikalischen Eigenschaften in den gefilterten Songs zusammenhängen. 
+            Werte nahe **1** deuten auf eine starke *positive* Korrelation hin, während Werte nahe **-1** auf eine starke *negative* Korrelation hindeuten. Werte um **0** bedeuten keinen klaren Zusammenhang.
+            """)
 
         # Auswahl der relevanten numerischen Spalten für die Korrelation
         corr_columns_keys = ['popularity', 'year', 'danceability', 'energy', 'valence', 'tempo']
