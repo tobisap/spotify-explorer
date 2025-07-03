@@ -26,10 +26,11 @@ h1, h2, h3 {
 }
 
 [data-testid="stMetric"] {
-    background-color: #282828;
-    border: 1px solid #404040;
+    background-color: #131313;
+    border: 1px solid #131313;
     border-radius: 10px;
     padding: 1rem;
+    font-family: 'Montserrat'
 }
 
 h1 {
