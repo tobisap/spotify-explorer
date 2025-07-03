@@ -233,17 +233,39 @@ def explorer_page(df_explorer):
         fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#131313", font_color="#FFFFFF")
         st.plotly_chart(fig, use_container_width=True)
 
+        # --- Song-Auswahl und Player ---
         st.subheader("Song-Details und Player")
         sorted_songs = filtered_df.sort_values(by='popularity', ascending=False)
         sorted_songs['display_option'] = sorted_songs['name'] + ' – ' + sorted_songs['display_artists']
         song_list = [""] + sorted_songs['display_option'].tolist()
         selected_option = st.selectbox("Wähle einen Song:", options=song_list, key="song_select")
-        
+
         if selected_option:
             selected_song = sorted_songs[sorted_songs['display_option'] == selected_option].iloc[0]
             track_id = selected_song['link'].split('/track/')[-1].split('?')[0]
             embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator&theme=0"
-            st.components.v1.iframe(embed_url, height=80)
+            st.components.v1.iframe(embed_url, height=152) # Haupt-Player
+
+            # --- NEU: ANZEIGE DER SONG-ATTRIBUTE IN KACHELN ---
+            st.markdown("---")
+            st.subheader("Musikalische Eigenschaften")
+
+            # Annahme: Tanzbarkeit, Energie und Valenz sind in den Daten auf einer Skala von 0-1000
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric(label="Tanzbarkeit 💃", value=f"{int(selected_song.get('danceability', 0) / 10)}%")
+            with col2:
+                st.metric(label="Energie ⚡", value=f"{int(selected_song.get('energy', 0) / 10)}%")
+            with col3:
+                st.metric(label="Positivität 😊", value=f"{int(selected_song.get('valence', 0) / 10)}%")
+
+            col4, col5, col6 = st.columns(3)
+            with col4:
+                st.metric(label="Tempo 👟", value=f"{int(selected_song.get('tempo', 0))} BPM")
+            with col5:
+                st.metric(label="Popularität 🔥", value=f"{selected_song.get('popularity', 0)} / 100")
+            with col6:
+                st.metric(label="Jahr 📅", value=f"{selected_song.get('year', 'N/A')}")
 
         st.markdown("---")
         st.write("") 
