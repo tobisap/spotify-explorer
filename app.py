@@ -161,7 +161,6 @@ def explorer_page(df_explorer):
         end_decade = int(end_decade_str.replace('er', ''))
         filtered_df = filtered_df[(filtered_df['decade'] >= start_decade) & (filtered_df['decade'] <= end_decade)]
 
-    # --- KORRIGIERTER/EINGEFÜGTER BLOCK ---
     # Hier werden die fehlenden Filter für Tanzbarkeit, Popularität und Tempo hinzugefügt.
     dance_range = st.sidebar.slider(
         "Tanzbarkeit", 
@@ -191,8 +190,6 @@ def explorer_page(df_explorer):
         (filtered_df['tempo'] >= tempo_range[0]) & 
         (filtered_df['tempo'] <= tempo_range[1])
     ]
-
-
     
     st.header(f"Gefilterte Ergebnisse")
     if filtered_df.empty:
@@ -233,7 +230,8 @@ def explorer_page(df_explorer):
 
 def game_page(df_game):
     """Rendert die Spiel-Seite."""
-    st.title("🎵 Song-Quiz: Wie gut kennst du die Musik?")
+    st.title("Song-Quiz: Wie gut kennst du die Musik?")
+    st.write("") 
     st.markdown("Höre einen zufälligen Song und schätze seine Eigenschaften. Je näher du liegst, desto mehr Punkte bekommst du!")
 
     # Initialisiere den Spielzustand
