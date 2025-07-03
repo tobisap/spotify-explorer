@@ -24,6 +24,14 @@ h1, h2, h3 {
     font-weight: 700;
     color: #FFFFFF;
 }
+
+[data-testid="stMetric"] {
+    background-color: #282828;
+    border: 1px solid #404040;
+    border-radius: 10px;
+    padding: 1rem;
+}
+
 h1 {
     font-weight: 900;
     background: -webkit-linear-gradient(45deg, #1DB954, #FFFFFF);
