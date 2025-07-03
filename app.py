@@ -30,7 +30,7 @@ h1 {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     border-bottom: 1px solid #535353;
-    padding-bottom: 2rem;
+    padding-bottom: 4rem;
 }
 .st-emotion-cache-16txtl3 { 
     background-color: #040404; 
