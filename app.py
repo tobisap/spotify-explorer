@@ -72,11 +72,11 @@ h1 {
     color: #FFFFFF !important;
     border: none;
 }
-/* --- Modernes Slider-Design im Apple-Stil --- */
+/* --- Modernes Slider-Design --- */
 
 /* Hauptcontainer des Sliders */
 [data-testid="stSlider"] {
-    padding-top: 15px; /* Etwas Platz nach oben schaffen */
+    padding-top: 5px;
 }
 
 /* Der Schieberegler-Balken (Track) für Webkit-Browser (Chrome, Safari) */
@@ -97,8 +97,8 @@ h1 {
 [data-testid="stSlider"] .st-emotion-cache-134d5h5::-webkit-slider-thumb {
     -webkit-appearance: none; /* Standard-Aussehen entfernen */
     appearance: none;
-    width: 20px; /* Größe des Anfassers */
-    height: 20px;
+    width: 30px; /* Größe des Anfassers */
+    height: 30px;
     border-radius: 50%; /* Rund machen */
     background: #FFFFFF; /* Weißer Anfasser */
     cursor: pointer;
@@ -109,13 +109,13 @@ h1 {
 
 /* Leichte Vergrößerung beim Klicken */
 [data-testid="stSlider"] .st-emotion-cache-134d5h5::-webkit-slider-thumb:active {
-    transform: scale(1.1);
+    transform: scale(1.3);
 }
 
 /* Dasselbe für Mozilla Firefox */
 [data-testid="stSlider"] .st-emotion-cache-134d5h5::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     background: #FFFFFF;
     cursor: pointer;
