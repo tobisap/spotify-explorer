@@ -108,6 +108,8 @@ def load_data():
     return df
 
 df = load_data()
+if df is not None:
+    st.sidebar.info(f"✅ {len(df)} Songs erfolgreich aus der Datei geladen.")
 
 # --- HIGHSCORE FUNKTIONEN ---
 HIGHSCORE_FILE = "highscores.json"
