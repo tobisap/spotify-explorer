@@ -193,7 +193,7 @@ else:
 
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="#273126",
+        plot_bgcolor="#131313",
         font_color="#FFFFFF",
         hoverlabel=dict(bgcolor="#191414", font_size=16, font_family="Montserrat")
     )
