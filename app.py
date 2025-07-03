@@ -243,7 +243,37 @@ def explorer_page(df_explorer):
             selected_song = sorted_songs[sorted_songs['display_option'] == selected_option].iloc[0]
             track_id = selected_song['link'].split('/track/')[-1].split('?')[0]
             embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator&theme=0"
-            st.components.v1.iframe(embed_url, height=80)
+            st.components.v1.iframe(embed_url, height=150)
+            
+            st.markdown("---")
+            st.subheader("Ähnliche Songs zum Entdecken")
+
+            # --- NEUE AUTOMATISCHE KI-FUNKTION ---
+            with st.spinner("Finde ähnliche Songs für dich..."):
+                # Index des ausgewählten Songs im Original-DataFrame finden
+                song_index_loc = df_index.get_loc(selected_song.name)
+                song_vector = scaled_features[song_index_loc].reshape(1, -1)
+                
+                # Distanzen berechnen
+                distances = euclidean_distances(song_vector, scaled_features)[0]
+                
+                # Die 3 ähnlichsten Indizes finden (der erste [0] ist der Song selbst)
+                similar_indices = distances.argsort()[1:4] 
+                
+                similar_songs_df = df.iloc[similar_indices]
+            
+                # Ergebnisse in drei Spalten als Spotify-Player darstellen
+                cols = st.columns(3)
+                for i, (_, row) in enumerate(similar_songs_df.iterrows()):
+                    with cols[i]:
+                        st.markdown(f"**{row['name']}**")
+                        st.markdown(f"*{row['display_artists']}*")
+                    
+                        # Kleinen Player für jeden empfohlenen Song erstellen
+                        sim_track_id = row['link'].split('/track/')[-1].split('?')[0]
+                        sim_embed_url = f"https://open.spotify.com/embed/track/{sim_track_id}?utm_source=generator&theme=0"
+                        st.components.v1.iframe(sim_embed_url, height=70)
+
 
         st.markdown("---")
         st.write("") 
