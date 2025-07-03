@@ -426,16 +426,6 @@ def game_page(df_game):
                 st.session_state.game_round = 0 # Setzt das Spiel zurück
                 st.rerun()
 
-
-    # --- HIGHSCORE-ANZEIGE ---
-    with col2:
-        st.subheader("🏆 Highscores")
-        if not st.session_state.high_scores:
-            st.write("Noch keine Highscores.")
-        else:
-            for i, score in enumerate(st.session_state.high_scores):
-                st.markdown(f"**{i+1}. {score['name']}**: {score['score']} Punkte")
-
     st.markdown("---")
 
     # --- SPIELABLAUF ---
@@ -504,6 +494,14 @@ def game_page(df_game):
                 st.session_state.current_song = df_game.sample(1).iloc[0]
                 st.rerun()
 
+    # --- HIGHSCORE-ANZEIGE ---
+    with col2:
+        st.subheader("🏆 Highscores")
+        if not st.session_state.high_scores:
+            st.write("Noch keine Highscores.")
+        else:
+            for i, score in enumerate(st.session_state.high_scores):
+                st.markdown(f"**{i+1}. {score['name']}**: {score['score']} Punkte")
 
 # --- HAUPTLOGIK ZUR SEITENAUSWAHL ---
 if df is None:
