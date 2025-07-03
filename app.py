@@ -117,6 +117,11 @@ def load_data():
     return df
 
 df = load_data()
+if df is None:
+    st.stop()
+
+# KI-Daten vorbereiten (wichtig!)
+scaled_features, df_index = prepare_ai_data(df)
 
 # --- HIGHSCORE FUNKTIONEN ---
 HIGHSCORE_FILE = "highscores.json"
@@ -464,6 +469,7 @@ if st.sidebar.button("Song-Quiz", use_container_width=True, type=("primary" if s
 
 # Lade die ausgewählte Seite
 if st.session_state.page == 'Explorer':
-    explorer_page(df)
+    # KORREKTER AUFRUF mit allen drei Argumenten
+    explorer_page(df, scaled_features, df_index)
 elif st.session_state.page == 'Game':
     game_page(df)
