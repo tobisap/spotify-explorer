@@ -1,5 +1,3 @@
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics.pairwise import euclidean_distances
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -119,33 +117,6 @@ def load_data():
     return df
 
 df = load_data()
-if df is None:
-    st.stop()
-
-# FÜGEN SIE DIESE FUNKTION HIER EIN
-@st.cache_data
-def prepare_ai_data(df):
-    """Bereitet die Daten für die Ähnlichkeitssuche vor (ohne Namens-Index)."""
-    feature_cols = ['danceability', 'energy', 'valence', 'tempo', 'popularity', 'year']
-    
-    # Sicherstellen, dass nur existierende Spalten verwendet werden
-    existing_features = [col for col in feature_cols if col in df.columns]
-    ai_df = df[existing_features]
-    
-    # Skalieren der Features
-    scaler = StandardScaler()
-    scaled_features = scaler.fit_transform(ai_df)
-    
-    return scaled_features
-
-
-# --- DATENLADEN ---
-df = load_data()
-if df is None:
-    st.stop()
-
-# KI-Daten vorbereiten (wichtig!)
-scaled_features, df_index = prepare_ai_data(df)
 
 # --- HIGHSCORE FUNKTIONEN ---
 HIGHSCORE_FILE = "highscores.json"
@@ -262,44 +233,17 @@ def explorer_page(df_explorer):
         fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#131313", font_color="#FFFFFF")
         st.plotly_chart(fig, use_container_width=True)
 
-        # --- Song-Auswahl und Player ---
-    st.subheader("Song-Details und Player")
-    sorted_songs = filtered_df.sort_values(by='popularity', ascending=False)
-    sorted_songs['display_option'] = sorted_songs['name'] + ' – ' + sorted_songs['display_artists']
-    song_list = [""] + sorted_songs['display_option'].tolist()
-    selected_option = st.selectbox("Wähle einen Song:", options=song_list, key="song_select")
-
-    if selected_option:
-        selected_song = sorted_songs[sorted_songs['display_option'] == selected_option].iloc[0]
-        track_id = selected_song['link'].split('/track/')[-1].split('?')[0]
-        embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator&theme=0"
-        st.components.v1.iframe(embed_url, height=152)
-
-        st.markdown("---")
-        st.subheader("Ähnliche Songs zum Entdecken")
-
-        with st.spinner("Finde ähnliche Songs für dich..."):
-            # KORREKTUR: Finde die absolute Position des Songs im Original-DataFrame
-            song_original_index = selected_song.name # Dies ist der eindeutige Index-Label
-            song_position = df_explorer.index.get_loc(song_original_index)
-            
-            song_vector = scaled_features[song_position].reshape(1, -1)
-            
-            distances = euclidean_distances(song_vector, scaled_features)[0]
-            
-            similar_indices = distances.argsort()[1:4] 
-            
-            similar_songs_df = df_explorer.iloc[similar_indices]
-            
-            cols = st.columns(3)
-            for i, (_, row) in enumerate(similar_songs_df.iterrows()):
-                with cols[i]:
-                    st.markdown(f"**{row['name']}**")
-                    st.markdown(f"*{row['display_artists']}*")
-                    
-                    sim_track_id = row['link'].split('/track/')[-1].split('?')[0]
-                    sim_embed_url = f"https://open.spotify.com/embed/track/{sim_track_id}?utm_source=generator&theme=0"
-                    st.components.v1.iframe(sim_embed_url, height=80)
+        st.subheader("Song-Details und Player")
+        sorted_songs = filtered_df.sort_values(by='popularity', ascending=False)
+        sorted_songs['display_option'] = sorted_songs['name'] + ' – ' + sorted_songs['display_artists']
+        song_list = [""] + sorted_songs['display_option'].tolist()
+        selected_option = st.selectbox("Wähle einen Song:", options=song_list, key="song_select")
+        
+        if selected_option:
+            selected_song = sorted_songs[sorted_songs['display_option'] == selected_option].iloc[0]
+            track_id = selected_song['link'].split('/track/')[-1].split('?')[0]
+            embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator&theme=0"
+            st.components.v1.iframe(embed_url, height=80)
 
         st.markdown("---")
         st.write("") 
@@ -490,7 +434,6 @@ if st.sidebar.button("Song-Quiz", use_container_width=True, type=("primary" if s
 
 # Lade die ausgewählte Seite
 if st.session_state.page == 'Explorer':
-    # KORREKTER AUFRUF mit allen drei Argumenten
-    explorer_page(df, scaled_features, df_index)
+    explorer_page(df)
 elif st.session_state.page == 'Game':
     game_page(df)
