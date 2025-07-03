@@ -125,18 +125,18 @@ if df is None:
 # FÜGEN SIE DIESE FUNKTION HIER EIN
 @st.cache_data
 def prepare_ai_data(df):
-    """Bereitet die Daten für die Ähnlichkeitssuche vor."""
+    """Bereitet die Daten für die Ähnlichkeitssuche vor (ohne Namens-Index)."""
     feature_cols = ['danceability', 'energy', 'valence', 'tempo', 'popularity', 'year']
     
     # Sicherstellen, dass nur existierende Spalten verwendet werden
     existing_features = [col for col in feature_cols if col in df.columns]
-    ai_df = df.set_index('name')[existing_features].copy() # Wichtig: 'name' als Index setzen
+    ai_df = df[existing_features]
     
     # Skalieren der Features
     scaler = StandardScaler()
     scaled_features = scaler.fit_transform(ai_df)
     
-    return scaled_features, ai_df.index # Den neuen Index zurückgeben
+    return scaled_features
 
 
 # --- DATENLADEN ---
@@ -262,47 +262,44 @@ def explorer_page(df_explorer):
         fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#131313", font_color="#FFFFFF")
         st.plotly_chart(fig, use_container_width=True)
 
-        st.subheader("Song-Details und Player")
-        sorted_songs = filtered_df.sort_values(by='popularity', ascending=False)
-        sorted_songs['display_option'] = sorted_songs['name'] + ' – ' + sorted_songs['display_artists']
-        song_list = [""] + sorted_songs['display_option'].tolist()
-        selected_option = st.selectbox("Wähle einen Song:", options=song_list, key="song_select")
-        
-        if selected_option:
-            selected_song = sorted_songs[sorted_songs['display_option'] == selected_option].iloc[0]
-            track_id = selected_song['link'].split('/track/')[-1].split('?')[0]
-            embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator&theme=0"
-            st.components.v1.iframe(embed_url, height=150)
-            
-            st.markdown("---")
-            st.subheader("Ähnliche Songs zum Entdecken")
+        # --- Song-Auswahl und Player ---
+    st.subheader("Song-Details und Player")
+    sorted_songs = filtered_df.sort_values(by='popularity', ascending=False)
+    sorted_songs['display_option'] = sorted_songs['name'] + ' – ' + sorted_songs['display_artists']
+    song_list = [""] + sorted_songs['display_option'].tolist()
+    selected_option = st.selectbox("Wähle einen Song:", options=song_list, key="song_select")
 
-            # --- NEUE AUTOMATISCHE KI-FUNKTION ---
-            with st.spinner("Finde ähnliche Songs für dich..."):
-                # Index des ausgewählten Songs im Original-DataFrame finden
-                song_index_loc = df_index.get_loc(selected_song.name)
-                song_vector = scaled_features[song_index_loc].reshape(1, -1)
-                
-                # Distanzen berechnen
-                distances = euclidean_distances(song_vector, scaled_features)[0]
-                
-                # Die 3 ähnlichsten Indizes finden (der erste [0] ist der Song selbst)
-                similar_indices = distances.argsort()[1:4] 
-                
-                similar_songs_df = df.iloc[similar_indices]
+    if selected_option:
+        selected_song = sorted_songs[sorted_songs['display_option'] == selected_option].iloc[0]
+        track_id = selected_song['link'].split('/track/')[-1].split('?')[0]
+        embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator&theme=0"
+        st.components.v1.iframe(embed_url, height=152)
+
+        st.markdown("---")
+        st.subheader("Ähnliche Songs zum Entdecken")
+
+        with st.spinner("Finde ähnliche Songs für dich..."):
+            # KORREKTUR: Finde die absolute Position des Songs im Original-DataFrame
+            song_original_index = selected_song.name # Dies ist der eindeutige Index-Label
+            song_position = df_explorer.index.get_loc(song_original_index)
             
-                # Ergebnisse in drei Spalten als Spotify-Player darstellen
-                cols = st.columns(3)
-                for i, (_, row) in enumerate(similar_songs_df.iterrows()):
-                    with cols[i]:
-                        st.markdown(f"**{row['name']}**")
-                        st.markdown(f"*{row['display_artists']}*")
+            song_vector = scaled_features[song_position].reshape(1, -1)
+            
+            distances = euclidean_distances(song_vector, scaled_features)[0]
+            
+            similar_indices = distances.argsort()[1:4] 
+            
+            similar_songs_df = df_explorer.iloc[similar_indices]
+            
+            cols = st.columns(3)
+            for i, (_, row) in enumerate(similar_songs_df.iterrows()):
+                with cols[i]:
+                    st.markdown(f"**{row['name']}**")
+                    st.markdown(f"*{row['display_artists']}*")
                     
-                        # Kleinen Player für jeden empfohlenen Song erstellen
-                        sim_track_id = row['link'].split('/track/')[-1].split('?')[0]
-                        sim_embed_url = f"https://open.spotify.com/embed/track/{sim_track_id}?utm_source=generator&theme=0"
-                        st.components.v1.iframe(sim_embed_url, height=70)
-
+                    sim_track_id = row['link'].split('/track/')[-1].split('?')[0]
+                    sim_embed_url = f"https://open.spotify.com/embed/track/{sim_track_id}?utm_source=generator&theme=0"
+                    st.components.v1.iframe(sim_embed_url, height=80)
 
         st.markdown("---")
         st.write("") 
