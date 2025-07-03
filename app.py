@@ -20,11 +20,10 @@ body, .main {
     color: #FFFFFF; 
 }
 h1 {
-    background-color: #282828; /* Hintergrundfarbe */
-    color: #1DB954; /* Schriftfarbe */
-    padding: 1rem; /* Innenabstand */
-    border-radius: 8px; /* Abgerundete Ecken */
-    font-weight: 700;
+    font-weight: 900;
+    background: -webkit-linear-gradient(45deg, #1DB954, #FFFFFF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .st-emotion-cache-16txtl3 { 
