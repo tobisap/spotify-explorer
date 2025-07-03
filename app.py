@@ -280,7 +280,7 @@ def explorer_page(df_explorer):
                 (filtered_df['duration_s'] <= duration_range[1])
             ]
     
-    st.header(f"Gefilterte Ergebnisse")
+    st.header(f"Ergebnisse")
     if filtered_df.empty:
         st.warning("Keine Songs für die aktuelle Filterkombination gefunden.")
     else:
@@ -289,7 +289,8 @@ def explorer_page(df_explorer):
         col2.metric("Ø Energie", f"{filtered_df['energy'].mean():.2f}")
         col3.metric("Ø Positivität", f"{filtered_df['valence'].mean():.2f}")
 
-        # --- Interaktive Grafiken etc. (wie im Originalcode) ---
+        # --- Interaktive Grafiken etc. ---
+        st.markdown("<br>", unsafe_allow_html=True)
         st.subheader("Dynamische Analyse")
         axis_options_german = {
             'danceability': 'Tanzbarkeit', 'energy': 'Energie', 'tempo': 'Tempo',
