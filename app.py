@@ -168,7 +168,7 @@ def explorer_page(df_explorer):
     )
 
     # Wende die Skalierungsformel an, um die Daten auf den 0-100 Bereich zu bringen
-    scaled_danceability = (filtered_df['danceability'] / 10_000_000_000) * 100
+    scaled_danceability = (filtered_df['danceability'] / 1_000) * 100
 
     # Führe den Filter auf den skalierten Werten durch
     filtered_df = filtered_df[
