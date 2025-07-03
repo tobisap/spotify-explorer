@@ -214,8 +214,6 @@ else:
         )
         st.plotly_chart(fig_corr, use_container_width=True)
     
-    st.subheader("Song-Details anzeigen")
-    
     # --- Song-Auswahl und Player-Anzeige ---
     st.subheader("Song-Details und Player")
     sorted_songs = filtered_df.sort_values(by='popularity', ascending=False)
