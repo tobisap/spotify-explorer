@@ -164,7 +164,7 @@ def explorer_page(df_explorer):
     # Hier werden die fehlenden Filter für Tanzbarkeit, Popularität und Tempo hinzugefügt.
     dance_range = st.sidebar.slider(
         "Tanzbarkeit", 
-        min_value=0.0, max_value=1.0, value=(0.0, 1.0), step=0.01
+        min_value=0, max_value=100, value=(0, 100)
     )
     filtered_df = filtered_df[
         (filtered_df['danceability'] >= dance_range[0]) & 
@@ -316,9 +316,9 @@ def game_page(df_game):
         else:
             # --- ERGEBNISSE ANZEIGEN ---
             actual_values = {
-                'dance': int(song['danceability'] * 100),
-                'energy': int(song['energy'] * 100),
-                'valence': int(song['valence'] * 100)
+                'dance': int(song['danceability']),
+                'energy': int(song['energy']),
+                'valence': int(song['valence'])
             }
             user_guesses = st.session_state.guesses
             
