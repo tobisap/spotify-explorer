@@ -280,6 +280,7 @@ def explorer_page(df_explorer):
                 (filtered_df['duration_s'] <= duration_range[1])
             ]
     
+    st.markdown("<br>", unsafe_allow_html=True)
     st.header(f"Ergebnisse")
     if filtered_df.empty:
         st.warning("Keine Songs für die aktuelle Filterkombination gefunden.")
