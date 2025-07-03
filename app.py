@@ -222,21 +222,17 @@ else:
     selected_song_name = st.selectbox("Wähle einen Song, um ihn abzuspielen:", options=song_list)
 
 # Ein einziges Dropdown für die Songauswahl
-    selected_option = st.selectbox("Wähle einen Song, um ihn abzuspielen:", options=song_list)
+    selected_option = st.selectbox("Wähle einen Song, um ihn abzuspielen:", options=song_list, key="song_select")
     
     if selected_option:
-        # Finde den ausgewählten Song anhand des kombinierten Namens
         selected_song = sorted_songs[sorted_songs['display_option'] == selected_option].iloc[0]
-        
         st.markdown(f"**Titel:** {selected_song['name']} | **Künstler:** {selected_song['display_artists']}")
         
         link_col = 'Link' if 'Link' in selected_song and pd.notna(selected_song['Link']) else 't' if 't' in selected_song and pd.notna(selected_song['t']) else None
-
         if link_col:
             try:
                 track_id = selected_song[link_col].split('/track/')[-1].split('?')[0]
                 embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator&theme=0"
-                
                 st.components.v1.iframe(embed_url, height=80)
             except:
                 st.warning("Der Spotify-Link für diesen Song scheint ungültig zu sein.")
