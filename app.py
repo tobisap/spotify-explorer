@@ -166,9 +166,14 @@ def explorer_page(df_explorer):
         "Tanzbarkeit", 
         min_value=0, max_value=100, value=(0, 100)
     )
+
+    # Wende die Skalierungsformel an, um die Daten auf den 0-100 Bereich zu bringen
+    scaled_danceability = (filtered_df['danceability'] / 10_000_000_000) * 100
+
+    # Führe den Filter auf den skalierten Werten durch
     filtered_df = filtered_df[
-        (filtered_df['danceability'] >= dance_range[0]) & 
-        (filtered_df['danceability'] <= dance_range[1])
+        (scaled_danceability >= dance_range[0]) & 
+        (scaled_danceability <= dance_range[1])
     ]
 
     popularity_range = st.sidebar.slider(
