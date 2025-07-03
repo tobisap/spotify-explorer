@@ -193,12 +193,11 @@ def save_highscores(scores):
 # --- SEITEN DEFINITIONEN ---
 
 def explorer_page(df_explorer):
-    """Rendert die Explorer-Seite."""
+    """Rendert die Explorer-Seite mit Reset-Button."""
 
-    # HIER fügen Sie die Funktion ein
+    # Die Hilfsfunktion zum Zurücksetzen
     def reset_filters():
         """Setzt alle Filter im Session State zurück."""
-        # Liste aller Schlüssel, die zu den Filtern gehören
         filter_keys = [
             "song_search", "decade_slider", "dance_range", 
             "popularity_range", "tempo_range", "duration_range"
@@ -206,6 +205,8 @@ def explorer_page(df_explorer):
         for key in filter_keys:
             if key in st.session_state:
                 del st.session_state[key]
+        # st.rerun() wird implizit durch den Button-Klick ausgelöst,
+        # kann aber zur Sicherheit explizit aufgerufen werden.
         st.rerun()
 
     st.title("Spotify Musik-Explorer")
