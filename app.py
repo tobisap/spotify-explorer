@@ -194,6 +194,17 @@ def save_highscores(scores):
 
 def explorer_page(df_explorer):
     """Rendert die Explorer-Seite."""
+    def reset_filters():
+        """Setzt alle Filter im Session State zurück."""
+        filter_keys = [
+            "song_search", "decade_slider", "dance_range", 
+            "popularity_range", "tempo_range", "duration_range"
+        ]
+        for key in filter_keys:
+            if key in st.session_state:
+                del st.session_state[key]
+        st.rerun()
+
     st.title("Spotify Musik-Explorer")
     
     if df_explorer.empty:
