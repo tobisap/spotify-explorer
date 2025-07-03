@@ -214,34 +214,52 @@ else:
         )
         st.plotly_chart(fig_corr, use_container_width=True)
     
-    # --- Song-Auswahl und Player-Anzeige ---
+ # --- Song-Auswahl und Player-Anzeige ---
     st.subheader("Song-Details und Player")
     sorted_songs = filtered_df.sort_values(by='popularity', ascending=False)
-    song_list = sorted_songs['name'].tolist()
-    song_list.insert(0, "")
-    selected_song_name = st.selectbox("Wähle einen Song, um ihn abzuspielen:", options=song_list)
-
-# NEU: Erstelle eine kombinierte Spalte für die Anzeige im Dropdown
-    sorted_songs['display_option'] = sorted_songs['name'] + ' – ' + sorted_songs['display_artists']
     
+    sorted_songs['display_option'] = sorted_songs['name'] + ' – ' + sorted_songs['display_artists']
     song_list = [""] + sorted_songs['display_option'].tolist()
     
-    if selected_song_name:
-        selected_song = filtered_df[filtered_df['name'] == selected_song_name].iloc[0]
-        st.markdown(f"**Titel:** {selected_song['name']} | **Künstler:** {selected_song['display_artists']}")
+    selected_option = st.selectbox("Wähle einen Song, um ihn abzuspielen:", options=song_list, key="song_select")
+    
+    if selected_option:
+        selected_song = sorted_songs[sorted_songs['display_option'] == selected_option].iloc[0]
         
-        # Link-Spalte prüfen
+        # ENTFERNT: Die doppelte Textanzeige wurde hier gelöscht.
+        # st.markdown(f"**Titel:** {selected_song['name']} | **Künstler:** {selected_song['display_artists']}")
+        
         link_col = 'Link' if 'Link' in selected_song and pd.notna(selected_song['Link']) else 't' if 't' in selected_song and pd.notna(selected_song['t']) else None
 
         if link_col:
-            # NEU: Extrahiere die Track-ID und baue den Embed-Link
             try:
                 track_id = selected_song[link_col].split('/track/')[-1].split('?')[0]
                 embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator&theme=0"
                 
-                # Zeige den Player als HTML-Komponente an
+                # Nur noch der Player wird angezeigt
                 st.components.v1.iframe(embed_url, height=80)
             except:
                 st.warning("Der Spotify-Link für diesen Song scheint ungültig zu sein.")
         else:
             st.warning("Kein Spotify-Link für diesen Song verfügbar.")
+
+    # --- Korrelationsmatrix in einem ausklappbaren Bereich ---
+    with st.expander("Korrelationsmatrix der Merkmale anzeigen"):
+        st.write("Diese Heatmap zeigt, wie die verschiedenen Song-Eigenschaften für deine aktuelle Auswahl zusammenhängen. Werte nahe 1 (hellgrün) zeigen einen starken positiven Zusammenhang.")
+        
+        corr_cols = ['danceability', 'energy', 'tempo', 'popularity', 'valence', 'year']
+        corr_df = filtered_df[[col for col in corr_cols if col in filtered_df.columns]]
+        
+        matrix = corr_df.corr()
+        
+        fig_corr = px.imshow(
+            matrix, text_auto=True, aspect="auto",
+            color_continuous_scale='Greens',
+            labels={"color": "Korrelation"}
+        )
+        fig_corr.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="#282828",
+            font_color="#FFFFFF"
+        )
+        st.plotly_chart(fig_corr, use_container_width=True)
