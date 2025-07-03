@@ -221,8 +221,8 @@ def explorer_page(df_explorer):
             duration_range = st.sidebar.slider(
                 "Liedlänge (Sekunden)",
                 min_value=85,  # ANPASSUNG: Start bei 85 Sekunden
-                max_value=max_duration,
-                value=(85, max_duration), # ANPASSUNG: Standardbereich beginnt bei 85
+                max_value=465,
+                value=(85, 465), # ANPASSUNG: Standardbereich beginnt bei 85
                 step=5  # ANPASSUNG: Schritte in 5-Sekunden-Intervallen
             )
             filtered_df = filtered_df[
