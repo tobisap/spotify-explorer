@@ -180,8 +180,6 @@ else:
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    st.subheader("Song-Details anzeigen")
-
 # --- Korrelationsmatrix in einem ausklappbaren Bereich ---
     with st.expander("Korrelationsmatrix der Merkmale anzeigen"):
         st.write("Diese Heatmap zeigt, wie die verschiedenen Song-Eigenschaften für deine aktuelle Auswahl zusammenhängen. Werte nahe 1 (hellgrün) zeigen einen starken positiven Zusammenhang.")
@@ -205,6 +203,8 @@ else:
             font_color="#FFFFFF"
         )
         st.plotly_chart(fig_corr, use_container_width=True)
+    
+    st.subheader("Song-Details anzeigen")
     
     # Sortiere die gefilterten Songs nach Popularität für das Dropdown
     sorted_songs = filtered_df.sort_values(by='popularity', ascending=False)
