@@ -19,13 +19,16 @@ body, .main {
     font-family: 'Montserrat', sans-serif; 
     color: #FFFFFF; 
 }
-h1 { 
-    color: #1DB954; 
-    font-weight: 700; 
+h1 {
+    font-weight: 900;
+    background: -webkit-linear-gradient(45deg, #1DB954, #FFFFFF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
+
 .st-emotion-cache-16txtl3 { 
     background-color: #040404; 
-    border-right: 1px solid #0F1116; 
+    border-right: 1px solid #282828; 
 }
 .st-emotion-cache-16txtl3 .st-emotion-cache-1y4p8pa { 
     color: #1DB954 !important; 
