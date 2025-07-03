@@ -320,7 +320,7 @@ def explorer_page(df_explorer):
             height=600
         )
 
-    st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
 
         # --- Song-Auswahl und Player ---
         st.subheader("Song-Details und Player")
