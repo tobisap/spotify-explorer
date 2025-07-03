@@ -364,9 +364,13 @@ if 'page' not in st.session_state:
 
 # Seitenleiste für die Navigation
 st.sidebar.title("Navigation")
+
 if st.sidebar.button("Musik-Explorer", use_container_width=True, type=("primary" if st.session_state.page == 'Explorer' else "secondary")):
     st.session_state.page = 'Explorer'
-    st.rerun() # Neu laden, um sicherzustellen, dass die Seite korrekt wechselt
+    st.rerun()
+
+# Fügt eine horizontale Trennlinie hinzu
+st.sidebar.divider() 
 
 if st.sidebar.button("Song-Quiz", use_container_width=True, type=("primary" if st.session_state.page == 'Game' else "secondary")):
     st.session_state.page = 'Game'
