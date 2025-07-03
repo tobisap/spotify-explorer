@@ -214,20 +214,21 @@ else:
         )
         st.plotly_chart(fig_corr, use_container_width=True)
     
-   # --- Song-Auswahl und Player-Anzeige ---
+    # --- Song-Auswahl und Player-Anzeige ---
     st.subheader("Song-Details und Player")
-    
-    # Sortiere die Songs für die Auswahl
     sorted_songs = filtered_df.sort_values(by='popularity', ascending=False)
-    
-    # NEU: Erstelle eine kombinierte Spalte für die Anzeige im Dropdown
+    song_list = sorted_songs['name'].tolist()
+    song_list.insert(0, "")
+    selected_song_name = st.selectbox("Wähle einen Song, um ihn abzuspielen:", options=song_list)
+
+# NEU: Erstelle eine kombinierte Spalte für die Anzeige im Dropdown
     sorted_songs['display_option'] = sorted_songs['name'] + ' – ' + sorted_songs['display_artists']
     
     song_list = [""] + sorted_songs['display_option'].tolist()
     
     selected_option = st.selectbox("Wähle einen Song:", options=song_list)
     
-    if selected_option:
+    if selected_song_name:
         selected_song = filtered_df[filtered_df['name'] == selected_song_name].iloc[0]
         st.markdown(f"**Titel:** {selected_song['name']} | **Künstler:** {selected_song['display_artists']}")
         
