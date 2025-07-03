@@ -192,7 +192,7 @@ else:
 
 # --- Korrelationsmatrix in einem ausklappbaren Bereich ---
     with st.expander("Korrelationsmatrix der Merkmale anzeigen"):
-        st.write("Diese Heatmap zeigt, wie die verschiedenen Song-Eigenschaften für alle Songs zusammenhängen. \nWerte nahe 1 (grün) zeigen einen starken positiven Zusammenhang.")
+        st.write("Diese Heatmap zeigt, wie die verschiedenen Song-Eigenschaften für alle Songs zusammenhängen. Werte nahe 1 (grün) zeigen einen starken positiven Zusammenhang.")
         corr_cols = ['danceability', 'energy', 'tempo', 'popularity', 'valence', 'year']
         corr_df = filtered_df[[col for col in corr_cols if col in filtered_df.columns]]
         
