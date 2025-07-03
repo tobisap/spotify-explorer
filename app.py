@@ -88,17 +88,18 @@ if df.empty:
 # --- Seitenleiste mit Filtern ---
 st.sidebar.header("Filter")
 
-# NEU: Songsuche ganz oben
-search_term = st.sidebar.text_input("Songsuche", key="song_search")
+# GEÄNDERT: Suchfeld-Beschriftung angepasst
+search_term = st.sidebar.text_input("Song- oder Künstlersuche", key="song_search")
 
 filtered_df = df.copy()
 
-# Wende zuerst die Songsuche an, falls ein Begriff eingegeben wurde
+# GEÄNDERT: Suche nach Song UND Künstler
 if search_term:
-    # `case=False` ignoriert Groß- und Kleinschreibung
-    filtered_df = filtered_df[filtered_df['name'].str.contains(search_term, case=False, na=False)]
-
-
+    # `case=False` ignoriert Groß- und Kleinschreibung. `|` bedeutet ODER.
+    filtered_df = filtered_df[
+        filtered_df['name'].str.contains(search_term, case=False, na=False) |
+        filtered_df['display_artists'].str.contains(search_term, case=False, na=False)
+    ]
 # Die restlichen Filter werden auf das (möglicherweise schon durch die Suche verkleinerte) Set angewendet
 if 'decade' in filtered_df.columns and len(filtered_df['decade'].unique()) > 1:
     decades = sorted(filtered_df['decade'].unique())
