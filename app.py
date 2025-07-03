@@ -299,11 +299,28 @@ def explorer_page(df_explorer):
         x_axis_key = col_x.selectbox("X-Achse:", options=list(axis_options_german.keys()), format_func=lambda x: axis_options_german[x], index=3)
         y_axis_key = col_y.selectbox("Y-Achse:", options=list(axis_options_german.keys()), format_func=lambda x: axis_options_german[x], index=1)
         
-        fig = px.scatter(filtered_df, x=x_axis_key, y=y_axis_key, color="popularity",
-                         color_continuous_scale=["#FFFFFF", "#1DB954"], size="popularity", size_max=60,
-                         hover_name="name", hover_data=['display_artists'])
-        fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#131313", font_color="#FFFFFF", height=600)
-        st.plotly_chart(fig, use_container_width=True)
+        fig = px.scatter(
+            filtered_df,
+            x=x_axis_key,
+            y=y_axis_key,
+            color="popularity",
+            color_continuous_scale=["#FFFFFF", "#1DB954"],
+            size="popularity",
+            size_max=60,
+            # 'hover_name' wird entfernt und durch die Vorlage ersetzt
+            hover_data=['display_artists'],  # Diese Daten werden für die Vorlage benötigt
+            hovertemplate="<b>Artist</b>: %{customdata[0]}<extra></extra>" # Benutzerdefinierte Vorlage
+        )
+
+        # Passen Sie das Layout an und setzen Sie die Höhe
+        fig.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="#131313",
+            font_color="#FFFFFF",
+            height=600
+        )
+
+st.plotly_chart(fig, use_container_width=True)
 
         # --- Song-Auswahl und Player ---
         st.subheader("Song-Details und Player")
