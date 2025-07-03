@@ -217,6 +217,9 @@ else:
     # --- Song-Auswahl und Player-Anzeige ---
     st.subheader("Song-Details und Player")
     sorted_songs = filtered_df.sort_values(by='popularity', ascending=False)
+    song_list = sorted_songs['name'].tolist()
+    song_list.insert(0, "")
+    selected_song_name = st.selectbox("Wähle einen Song, um ihn abzuspielen:", options=song_list)
 
 # NEU: Erstelle eine kombinierte Spalte für die Anzeige im Dropdown
     sorted_songs['display_option'] = sorted_songs['name'] + ' – ' + sorted_songs['display_artists']
