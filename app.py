@@ -293,7 +293,9 @@ def explorer_page(df_explorer):
                 (filtered_df['duration_s'] >= duration_range[0]) & 
                 (filtered_df['duration_s'] <= duration_range[1])
             ]
-    
+    st.sidebar.markdown("---") # Eine Trennlinie zur sauberen Optik
+    if st.sidebar.button("Filter zurücksetzen", use_container_width=True, key="reset_button"):
+        reset_filters()
     st.markdown("<br>", unsafe_allow_html=True)
     # st.header(f"Ergebnisse")
     if filtered_df.empty:
