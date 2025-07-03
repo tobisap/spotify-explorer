@@ -213,20 +213,22 @@ def explorer_page(df_explorer):
     ]
     
     if 'duration_s' in filtered_df.columns and not filtered_df.empty:
-        min_duration = int(filtered_df['duration_s'].min())
+        # Der dynamische Maximalwert wird beibehalten
         max_duration = int(filtered_df['duration_s'].max())
-        
-        duration_range = st.sidebar.slider(
-            "Liedlänge (Sekunden)",
-            min_value=min_duration,
-            max_value=max_duration,
-            value=(min_duration, max_duration),
-            step=10  # Schritte in 10-Sekunden-Intervallen
-        )
-        filtered_df = filtered_df[
-            (filtered_df['duration_s'] >= duration_range[0]) & 
-            (filtered_df['duration_s'] <= duration_range[1])
-        ]
+    
+        # Stellen Sie sicher, dass der Maximalwert größer als der Startwert ist
+        if max_duration > 85:
+            duration_range = st.sidebar.slider(
+                "Liedlänge (Sekunden)",
+                min_value=85,  # ANPASSUNG: Start bei 85 Sekunden
+                max_value=max_duration,
+                value=(85, max_duration), # ANPASSUNG: Standardbereich beginnt bei 85
+                step=5  # ANPASSUNG: Schritte in 5-Sekunden-Intervallen
+            )
+            filtered_df = filtered_df[
+                (filtered_df['duration_s'] >= duration_range[0]) & 
+                (filtered_df['duration_s'] <= duration_range[1])
+            ]
     
     st.header(f"Gefilterte Ergebnisse")
     if filtered_df.empty:
