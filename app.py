@@ -226,8 +226,6 @@ else:
     
     song_list = [""] + sorted_songs['display_option'].tolist()
     
-    selected_option = st.selectbox("Wähle einen Song:", options=song_list)
-    
     if selected_song_name:
         selected_song = filtered_df[filtered_df['name'] == selected_song_name].iloc[0]
         st.markdown(f"**Titel:** {selected_song['name']} | **Künstler:** {selected_song['display_artists']}")
