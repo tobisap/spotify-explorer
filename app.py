@@ -34,30 +34,12 @@ h1, h2, h3 {
 }
 
 h1 {
-    position: sticky; /* Hält das Element am oberen Rand */
-    top: 0;           /* Positioniert es ganz oben */
-    z-index: 1000;    /* Stellt sicher, dass es über anderen Elementen liegt */
-    padding: 1rem;    /* Angepasster Innenabstand */
-    margin: -1rem -1rem 0 -1rem; /* Gleicht Standard-Abstände von Streamlit aus */
-    
-    /* Ihre bisherigen Font-Styles bleiben erhalten */
-    font-weight: 900;
+    font-weight: 800;
     background: -webkit-linear-gradient(45deg, #1DB954, #FFFFFF);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     border-bottom: 1px solid #535353;
-}
-
-/* Dieses Pseudo-Element erzeugt den Hintergrund für den fixierten Header */
-h1::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #121212; /* Hintergrundfarbe, passend zum App-Design */
-    z-index: -1;         /* Legt den Hintergrund hinter den Text */
+    padding-bottom: 4rem;
 }
 .st-emotion-cache-16txtl3 { 
     background-color: #040404; 
