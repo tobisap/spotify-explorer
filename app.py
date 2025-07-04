@@ -439,7 +439,13 @@ def game_page(df_game):
         else:
             for i, score in enumerate(st.session_state.high_scores):
                 st.markdown(f"**{i+1}. {score['name']}**: {score['score']} Punkte")
-
+        
+        if st.button("Highscores zurücksetzen", help="Löscht die Highscore-Liste permanent."):
+            st.session_state.high_scores = [] # Leert die Liste in der aktuellen Sitzung
+            save_highscores([])              # Leert die gespeicherte JSON-Datei
+            st.toast("Highscores zurückgesetzt!") # Zeigt eine Bestätigung an
+            st.rerun()
+            
     st.markdown("---")
 
     # --- SPIELABLAUF ---
