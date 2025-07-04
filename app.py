@@ -396,16 +396,19 @@ def game_page(df_game):
         st.session_state.high_scores = load_highscores()
         st.session_state.current_song = None
         st.session_state.guess_submitted = False
+        st.session_state.score_calculated = False # KORREKTUR 1: Initialisierung der Sperre
 
     # --- SPIELSTEUERUNG ---
     col1, col2 = st.columns([3, 1])
     with col1:
         if st.session_state.game_round == 0:
             if st.button("Neues Spiel starten!"):
+                # Reset für ein komplett neues Spiel
                 st.session_state.game_round = 1
                 st.session_state.total_score = 0
                 st.session_state.current_song = df_game.sample(1).iloc[0]
                 st.session_state.guess_submitted = False
+                st.session_state.score_calculated = False # KORREKTUR 1: Sperre beim Start zurücksetzen
                 st.rerun()
         elif st.session_state.game_round <= 5:
             st.subheader(f"Runde {st.session_state.game_round} von 5 | Gesamtscore: {st.session_state.total_score}")
@@ -427,15 +430,6 @@ def game_page(df_game):
             if st.button("Nochmal spielen?"):
                 st.session_state.game_round = 0 # Setzt das Spiel zurück
                 st.rerun()
-    
-    if st.session_state.game_round == 0:
-    if st.button("Neues Spiel starten!"):
-        st.session_state.game_round = 1
-        st.session_state.total_score = 0
-        st.session_state.current_song = df_game.sample(1).iloc[0]
-        st.session_state.guess_submitted = False
-        st.session_state.score_calculated = False # <-- DIESE ZEILE HINZUFÜGEN
-        st.rerun()
 
     # --- HIGHSCORE-ANZEIGE ---
     with col2:
@@ -452,14 +446,12 @@ def game_page(df_game):
     if 1 <= st.session_state.game_round <= 5:
         song = st.session_state.current_song
         
-        # Spotify Player anzeigen
         try:
             track_id = song['link'].split('/track/')[-1].split('?')[0]
             embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator&theme=0"
             st.components.v1.iframe(embed_url, height=200)
         except Exception:
             st.error("Song konnte nicht geladen werden. Nächste Runde wird gestartet.")
-            # Nächste Runde erzwingen
             st.session_state.current_song = df_game.sample(1).iloc[0]
             st.rerun()
 
@@ -476,7 +468,6 @@ def game_page(df_game):
                     st.session_state.guesses = {'dance': guess_dance, 'energy': guess_energy, 'valence': guess_valence}
                     st.session_state.guess_submitted = True
                     st.rerun()
-        # Ersetzen Sie den obigen Block hiermit
         else:
             # --- ERGEBNISSE ANZEIGEN ---
             actual_values = {
@@ -485,20 +476,20 @@ def game_page(df_game):
                 'valence': int(song['valence'] / 10)
             }
             user_guesses = st.session_state.guesses
-    
-            # NEU: Prüfen, ob der Score für diese Runde schon vergeben wurde
-            if not st.session_state.get('score_calculated', False):
+            
+            # KORREKTUR 2: Die Kernlogik. Punkte werden nur berechnet, wenn die Sperre nicht gesetzt ist.
+            if not st.session_state.score_calculated:
                 round_score = 0
-                for i, attr in enumerate(['dance', 'energy', 'valence']):
+                for attr in ['dance', 'energy', 'valence']:
                     actual = actual_values[attr]
                     guess = user_guesses[attr]
                     diff = abs(actual - guess)
                     points = max(0, 100 - diff)
                     round_score += points
-        
+                
                 st.session_state.total_score += round_score
-                st.session_state.last_round_score = round_score # Score für die Anzeige speichern
-                st.session_state.score_calculated = True # Sperre setzen!
+                st.session_state.last_round_score = round_score # Score für die Anzeige zwischenspeichern
+                st.session_state.score_calculated = True       # Sperre setzen, damit Punkte nicht erneut vergeben werden
 
             st.subheader("Auswertung der Runde")
             st.write(f"Der Song war **{song['name']}** von **{song['display_artists']}**.")
@@ -509,7 +500,7 @@ def game_page(df_game):
                 guess = user_guesses[attr]
                 diff = abs(actual - guess)
                 points = max(0, 100 - diff)
-        
+                
                 with cols[i]:
                     st.metric(
                         label=attr.capitalize(),
@@ -517,15 +508,15 @@ def game_page(df_game):
                         delta=f"{points} Pkt. (deine Schätzung: {guess}%)",
                         delta_color="off"
                     )
-    
-            # Zeigt die Erfolgsmeldung mit dem gespeicherten Rundenscore an
-            round_score_display = st.session_state.get('last_round_score', 0)
-            st.success(f"Du hast in dieser Runde {round_score_display} von 300 möglichen Punkten erreicht!")
+            
+            # Die Erfolgsmeldung verwendet den zwischengespeicherten Score
+            last_round_score = st.session_state.get('last_round_score', 0)
+            st.success(f"Du hast in dieser Runde {last_round_score} von 300 möglichen Punkten erreicht!")
 
             if st.button("Nächster Song"):
                 st.session_state.game_round += 1
                 st.session_state.guess_submitted = False
-                st.session_state.score_calculated = False
+                st.session_state.score_calculated = False # KORREKTUR 3: Sperre für die nächste Runde zurücksetzen
                 st.session_state.current_song = df_game.sample(1).iloc[0]
                 st.rerun()
 
