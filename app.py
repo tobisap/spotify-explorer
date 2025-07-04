@@ -427,7 +427,15 @@ def game_page(df_game):
             if st.button("Nochmal spielen?"):
                 st.session_state.game_round = 0 # Setzt das Spiel zurück
                 st.rerun()
-
+    
+    if st.session_state.game_round == 0:
+    if st.button("Neues Spiel starten!"):
+        st.session_state.game_round = 1
+        st.session_state.total_score = 0
+        st.session_state.current_song = df_game.sample(1).iloc[0]
+        st.session_state.guess_submitted = False
+        st.session_state.score_calculated = False # <-- DIESE ZEILE HINZUFÜGEN
+        st.rerun()
 
     # --- HIGHSCORE-ANZEIGE ---
     with col2:
@@ -468,6 +476,7 @@ def game_page(df_game):
                     st.session_state.guesses = {'dance': guess_dance, 'energy': guess_energy, 'valence': guess_valence}
                     st.session_state.guess_submitted = True
                     st.rerun()
+        # Ersetzen Sie den obigen Block hiermit
         else:
             # --- ERGEBNISSE ANZEIGEN ---
             actual_values = {
@@ -476,8 +485,21 @@ def game_page(df_game):
                 'valence': int(song['valence'] / 10)
             }
             user_guesses = st.session_state.guesses
-            
-            round_score = 0
+    
+            # NEU: Prüfen, ob der Score für diese Runde schon vergeben wurde
+            if not st.session_state.get('score_calculated', False):
+                round_score = 0
+                for i, attr in enumerate(['dance', 'energy', 'valence']):
+                    actual = actual_values[attr]
+                    guess = user_guesses[attr]
+                    diff = abs(actual - guess)
+                    points = max(0, 100 - diff)
+                    round_score += points
+        
+                st.session_state.total_score += round_score
+                st.session_state.last_round_score = round_score # Score für die Anzeige speichern
+                st.session_state.score_calculated = True # Sperre setzen!
+
             st.subheader("Auswertung der Runde")
             st.write(f"Der Song war **{song['name']}** von **{song['display_artists']}**.")
 
@@ -486,9 +508,8 @@ def game_page(df_game):
                 actual = actual_values[attr]
                 guess = user_guesses[attr]
                 diff = abs(actual - guess)
-                points = max(0, 100 - diff) # 100 Punkte - 1 Punkt Abzug pro % Abweichung
-                round_score += points
-                
+                points = max(0, 100 - diff)
+        
                 with cols[i]:
                     st.metric(
                         label=attr.capitalize(),
@@ -496,13 +517,15 @@ def game_page(df_game):
                         delta=f"{points} Pkt. (deine Schätzung: {guess}%)",
                         delta_color="off"
                     )
-            
-            st.session_state.total_score += round_score
-            st.success(f"Du hast in dieser Runde {round_score} von 300 möglichen Punkten erreicht!")
+    
+            # Zeigt die Erfolgsmeldung mit dem gespeicherten Rundenscore an
+            round_score_display = st.session_state.get('last_round_score', 0)
+            st.success(f"Du hast in dieser Runde {round_score_display} von 300 möglichen Punkten erreicht!")
 
             if st.button("Nächster Song"):
                 st.session_state.game_round += 1
                 st.session_state.guess_submitted = False
+                st.session_state.score_calculated = False
                 st.session_state.current_song = df_game.sample(1).iloc[0]
                 st.rerun()
 
