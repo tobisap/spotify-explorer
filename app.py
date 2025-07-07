@@ -135,7 +135,7 @@ h1 {
 }
 
 [data-testid="stHorizontalBlock"] > div > [data-testid="stMetric"] {
-    flex-grow: 1;
+    flex-grow: 2;
 }
 </style>
 """
