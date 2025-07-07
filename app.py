@@ -137,7 +137,7 @@ st.markdown(spotify_dark_mode_css, unsafe_allow_html=True)
 # --- DATENLADEN ---
 @st.cache_data
 def load_data():
-    """Lädt die Parquet-Datei und bereinigt die Daten."""
+    """Lädt die Parquet-Datei."""
     try:
         df = pd.read_parquet('data_final.parquet')
     except FileNotFoundError:
@@ -623,7 +623,7 @@ with placeholder.container():
     # Zentrierte Ausrichtung für den Ladebildschirm
     _, col2, _ = st.columns([1, 2, 1])
     with col2:
-        st.image("https://media.giphy.com/media/uMS10123kL83u/giphy.gif") # Ein passendes GIF
+        st.image("Spotify-Loading.gif")
         progress_text = "Analysiere die Playlists... bitte einen Moment Geduld."
         my_bar = st.progress(0, text=progress_text)
 
