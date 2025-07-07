@@ -4,6 +4,7 @@ import plotly.express as px
 import json
 import os
 import numpy as np
+import time
 
 # --- Konfiguration & Design ---
 st.set_page_config(
@@ -615,7 +616,30 @@ def game_page(df_game):
                 st.session_state.current_song = df_game.sample(1).iloc[0]
                 st.rerun()
 
+# --- Ladebildschirm und Daten initialisieren ---
+placeholder = st.empty()
 
+with placeholder.container():
+    # Zentrierte Ausrichtung für den Ladebildschirm
+    _, col2, _ = st.columns([1, 2, 1])
+    with col2:
+        st.image("https://media.giphy.com/media/uMS10123kL83u/giphy.gif") # Ein passendes GIF
+        progress_text = "Analysiere die Playlists... bitte einen Moment Geduld."
+        my_bar = st.progress(0, text=progress_text)
+
+        for percent_complete in range(100):
+            time.sleep(0.02) # Kurze Pause für den Animationseffekt
+            my_bar.progress(percent_complete + 1, text=progress_text)
+        
+        # Lade-Text ändern, kurz bevor die Daten wirklich geladen werden
+        my_bar.progress(100, text="Fast geschafft...")
+        time.sleep(0.5)
+
+# Daten laden, NACHDEM der Ladebalken voll ist
+df = load_data()
+
+# Ladebildschirm "leeren" bzw. entfernen, sobald die Daten geladen sind
+placeholder.empty()
 # --- HAUPTLOGIK ZUR SEITENAUSWAHL ---
 if df is None:
     st.stop()
