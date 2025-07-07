@@ -198,8 +198,19 @@ def save_highscores(scores):
 def get_top_correlations(corr_matrix, num_results=4):
     """
     Findet die stärksten Korrelationen und gibt sie als eine Liste von
-    Wörterbüchern für die Darstellung in Kacheln zurück.
+    Wörterbüchern mit passenden Interpretationen zurück.
     """
+    # Wörterbuch mit vordefinierten Interpretationen für bestimmte Paare
+    # Der frozenset-Schlüssel stellt sicher, dass die Reihenfolge der Variablennamen egal ist.
+    interpretation_map = {
+        frozenset({'Energie', 'Tanzbarkeit'}): "Energiegeladene Songs sind oft auch gut tanzbar.",
+        frozenset({'Popularität', 'Jahr'}): "Neuere Songs sind tendenziell populärer als ältere.",
+        frozenset({'Energie', 'Popularität'}): "Energie scheint ein Faktor für die Beliebtheit zu sein.",
+        frozenset({'Valenz', 'Tanzbarkeit'}): "Fröhliche Songs laden meist auch zum Tanzen ein.",
+        frozenset({'Energie', 'Valenz'}): "Energie und eine positive Stimmung treten oft gemeinsam auf.",
+        frozenset({'Tempo', 'Energie'}): "Schnellere Songs haben häufig auch mehr Energie."
+    }
+
     # Matrix vorbereiten
     corr_unstacked = corr_matrix.copy().astype(float)
     corr_unstacked.values[np.triu_indices_from(corr_unstacked.values)] = np.nan
@@ -212,27 +223,31 @@ def get_top_correlations(corr_matrix, num_results=4):
         return []
 
     top_correlations = []
-    # Die Top-Korrelationen analysieren
     for index, abs_value in sorted_correlations.head(num_results).items():
         var1, var2 = index
         original_value = corr_matrix.loc[var1, var2]
 
-        # Stärke bestimmen
+        if abs_value < 0.2: continue
+
+        # Stärke, Richtung und Emoji bestimmen
         if abs_value >= 0.6: strength = "Stark"
         elif abs_value >= 0.4: strength = "Moderat"
         else: strength = "Leicht"
-
-        # Richtung und Emoji bestimmen
+        
         direction = "Positiv" if original_value > 0 else "Negativ"
         emoji = "📈" if original_value > 0 else "📉"
         
-        if abs_value < 0.2: continue # Sehr schwache Korrelationen überspringen
+        # Passenden Interpretationstext finden oder einen leeren String verwenden
+        pair = frozenset({var1, var2})
+        interpretation_text = interpretation_map.get(pair, "")
 
-        # Daten für die Kachel speichern
+        # Den finalen Text für die Kachel zusammensetzen
+        delta_text = f"{strength} {direction}. {interpretation_text}".strip()
+
         top_correlations.append({
             "label": f"{emoji} {var1} & {var2}",
             "value": f"{original_value:.2f}",
-            "delta": f"{strength} {direction}"
+            "delta": delta_text
         })
             
     return top_correlations
