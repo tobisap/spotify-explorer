@@ -339,14 +339,6 @@ def explorer_page(df_explorer):
         col1.metric("Songs gefunden", f"{len(filtered_df)}")
         col2.metric("Ø Energie", f"{filtered_df['energy'].mean():.2f}")
         col3.metric("Ø Positivität", f"{filtered_df['valence'].mean():.2f}")
-
-        st.markdown("---") 
-        
-        # --- NEUE REGELBASIERTE INTERPRETATION ---
-        # Der Gemini-Button wird entfernt und durch diesen Block ersetzt:
-        interpretation_text = generate_interpretation(filtered_df)
-        st.info(f"**Interpretation deiner Auswahl:** {interpretation_text}")
-        # --- ENDE DER NEUEN INTERPRETATION ---
         
         # --- Interaktive Grafiken etc. ---
         st.markdown("<br>", unsafe_allow_html=True)
@@ -400,6 +392,14 @@ def explorer_page(df_explorer):
                 st.metric(label="Jahr 📅", value=f"{selected_song.get('year', 'N/A')}")
 
         st.markdown("---")
+        
+        # --- NEUE REGELBASIERTE INTERPRETATION ---
+        interpretation_text = generate_interpretation(filtered_df)
+        st.info(f"**Interpretation deiner Auswahl:** {interpretation_text}")
+        # --- ENDE DER NEUEN INTERPRETATION ---
+        
+        st.markdown("---") 
+        
         st.write("") 
         with st.expander("Korrelations-Heatmap anzeigen"):
             st.markdown("""
