@@ -443,7 +443,7 @@ def explorer_page(df_explorer):
                 # --- INTERPRETATION HINZUGEFÜGT ---
                 st.subheader("Interpretation der Zusammenhänge")
                 # Ruft die neue Funktion auf und zeigt den Text an
-               interpretation = interpret_correlation_detailed(corr_matrix)
+                interpretation = interpret_correlation_detailed(corr_matrix)
                 st.markdown(interpretation)
                 # --- ENDE INTERPRETATION ---
             else:
