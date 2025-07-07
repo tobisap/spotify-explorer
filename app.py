@@ -11,7 +11,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# CSS für den Spotify Dark Mode (unverändert)
+# CSS für den Spotify Dark Mode
 spotify_dark_mode_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap');
@@ -109,7 +109,7 @@ h1 {
 
 /* Leichte Vergrößerung beim Klicken */
 [data-testid="stSlider"] .st-emotion-cache-134d5h5::-webkit-slider-thumb:active {
-    transform: scale(1.3);
+    transform: scale(1.5);
 }
 
 /* Dasselbe für Mozilla Firefox */
