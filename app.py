@@ -42,6 +42,40 @@ h1 {
     border-bottom: 1px solid #535353;
     padding-bottom: 4rem;
 }
+/* --- CSS für benutzerdefinierte, gleich hohe Kacheln --- */
+.custom-tile {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem;
+    border-radius: 10px;
+    background-color: #131313;
+    height: 100%; /* Der Schlüssel: Füllt die gesamte Spaltenhöhe aus */
+    border: 1px solid #282828;
+}
+.custom-tile h4 {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #B3B3B3;
+    margin: 0 0 0.5rem 0;
+    padding: 0;
+}
+.custom-tile .value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    line-height: 1;
+    margin: 0 0 0.5rem 0;
+    padding: 0;
+}
+.custom-tile .delta {
+    font-size: 0.9rem;
+    color: #FFFFFF;
+    white-space: normal;
+    line-height: 1.4;
+    margin: 0;
+    padding: 0;
+}
 .st-emotion-cache-16txtl3 { 
     background-color: #040404; 
     border-right: 1px solid #282828; 
@@ -128,15 +162,7 @@ h1 {
     white-space: normal; /* Erlaubt den Textumbruch */
     line-height: 1.4;    /* Verbessert den Zeilenabstand für bessere Lesbarkeit */
 }
-/* Stellt sicher, dass alle Kacheln in einer Reihe die gleiche Höhe haben */
-[data-testid="stHorizontalBlock"] > div {
-    display: flex;
-    flex-direction: column;
-}
 
-[data-testid="stHorizontalBlock"] > div > [data-testid="stMetric"] {
-    flex-grow: 2;
-}
 </style>
 """
 st.markdown(spotify_dark_mode_css, unsafe_allow_html=True)
@@ -464,16 +490,17 @@ def explorer_page(df_explorer):
                 top_corrs = get_top_correlations(corr_matrix, num_results=4)
 
                 if top_corrs:
-                    # Erstellt so viele Spalten, wie Ergebnisse vorhanden sind (max. 4)
                     cols = st.columns(len(top_corrs))
                     for i, corr_data in enumerate(top_corrs):
                         with cols[i]:
-                            st.metric(
-                                label=corr_data["label"],
-                                value=corr_data["value"],
-                                delta=corr_data["delta"],
-                                delta_color="off" # Verwendet Standardfarbe für den Text
-                            )
+                            # Erstellt eine Kachel mit HTML und unserem CSS
+                            st.markdown(f"""
+                            <div class="custom-tile">
+                                <h4>{corr_data['label']}</h4>
+                                <p class="value">{corr_data['value']}</p>
+                                <p class="delta">{corr_data['delta']}</p>
+                            </div>
+                            """, unsafe_allow_html=True)
                 else:
                     st.write("In dieser Auswahl gibt es keine nennenswerten Zusammenhänge.")
                 # --- ENDE INTERPRETATION ---
