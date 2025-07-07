@@ -440,13 +440,12 @@ def explorer_page(df_explorer):
         
                 st.plotly_chart(fig_corr, use_container_width=True)
                 
-                # --- NEUE INTERPRETATION HINZUGEFÜGT ---
-                st.markdown("---")
+                # --- INTERPRETATION HINZUGEFÜGT ---
                 st.subheader("Interpretation der Zusammenhänge")
                 # Ruft die neue Funktion auf und zeigt den Text an
                interpretation = interpret_correlation_detailed(corr_matrix)
                 st.markdown(interpretation)
-                # --- ENDE DER NEUEN INTERPRETATION ---
+                # --- ENDE INTERPRETATION ---
             else:
                 st.warning("Nicht genügend Daten vorhanden, um eine Korrelationsmatrix zu erstellen.")
 
