@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import json
 import os
+import numpy as np
 
 # --- Konfiguration & Design ---
 st.set_page_config(
