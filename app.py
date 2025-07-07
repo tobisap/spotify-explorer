@@ -194,6 +194,46 @@ def save_highscores(scores):
     with open(HIGHSCORE_FILE, 'w') as f:
         json.dump(scores, f, indent=4)
 
+def interpret_correlation(corr_matrix, threshold=0.4):
+    """
+    Analysiert eine Korrelationsmatrix und gibt eine textliche Interpretation
+    der stärksten Zusammenhänge zurück.
+    """
+    # Eine Kopie erstellen und die obere Dreiecksmatrix sowie die Diagonale ignorieren,
+    # um Duplikate und Selbstkorrelationen zu vermeiden.
+    interpret_matrix = corr_matrix.copy()
+    interpret_matrix.values[np.triu_indices_from(interpret_matrix.values)] = np.nan
+
+    # Stärkste positive Korrelation finden
+    max_corr = interpret_matrix.max().max()
+    positive_text = ""
+    if pd.notna(max_corr) and max_corr >= threshold:
+        max_corr_col = interpret_matrix.max().idxmax()
+        max_corr_row = interpret_matrix[max_corr_col].idxmax()
+        positive_text = f"""
+        📈 **Stärkster positiver Zusammenhang:** Zwischen **{max_corr_row}** und **{max_corr_col}** besteht mit einem Wert von **{max_corr:.2f}** eine deutliche positive Korrelation. 
+        Das bedeutet: Songs in deiner Auswahl, die einen hohen Wert bei '{max_corr_row}' haben, neigen auch dazu, bei '{max_corr_col}' hoch zu punkten. 
+        Ein klassisches Beispiel hierfür ist, dass energiegeladene Songs oft auch sehr tanzbar sind.
+        """
+
+    # Stärkste negative Korrelation finden
+    min_corr = interpret_matrix.min().min()
+    negative_text = ""
+    if pd.notna(min_corr) and min_corr <= -threshold:
+        min_corr_col = interpret_matrix.min().idxmin()
+        min_corr_row = interpret_matrix[min_corr_col].idxmin()
+        negative_text = f"""
+        📉 **Stärkster negativer Zusammenhang:**
+        Zwischen **{min_corr_row}** und **{min_corr_col}** gibt es mit **{min_corr:.2f}** einen nennenswerten negativen Zusammenhang.
+        Das heißt: Songs, die bei '{min_corr_row}' hoch abschneiden, haben tendenziell niedrigere Werte bei '{min_corr_col}'. 
+        Das könnte zum Beispiel bedeuten, dass Lieder mit hoher Positivität selten ein sehr langsames Tempo haben.
+        """
+
+    if not positive_text and not negative_text:
+        return "In deiner aktuellen Auswahl gibt es keine besonders starken Zusammenhänge (über +/- 0.4) zwischen den musikalischen Eigenschaften."
+
+    return positive_text + "\n" + negative_text
+
 # --- SEITEN DEFINITIONEN ---
 
 def explorer_page(df_explorer):
@@ -384,6 +424,14 @@ def explorer_page(df_explorer):
                 )
         
                 st.plotly_chart(fig_corr, use_container_width=True)
+                
+                # --- NEUE INTERPRETATION HINZUGEFÜGT ---
+                st.markdown("---")
+                st.subheader("Interpretation der Zusammenhänge")
+                # Ruft die neue Funktion auf und zeigt den Text an
+                interpretation = interpret_correlation(corr_matrix)
+                st.markdown(interpretation)
+                # --- ENDE DER NEUEN INTERPRETATION ---
             else:
                 st.warning("Nicht genügend Daten vorhanden, um eine Korrelationsmatrix zu erstellen.")
 
