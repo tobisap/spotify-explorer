@@ -195,45 +195,59 @@ def save_highscores(scores):
     with open(HIGHSCORE_FILE, 'w') as f:
         json.dump(scores, f, indent=4)
 
-def interpret_correlation(corr_matrix, threshold=0.4):
+def interpret_correlation_detailed(corr_matrix):
     """
-    Analysiert eine Korrelationsmatrix und gibt eine textliche Interpretation
-    der stärksten Zusammenhänge zurück.
+    Analysiert eine Korrelationsmatrix und gibt eine detaillierte,
+    textliche Interpretation mehrerer Zusammenhänge als Liste zurück.
     """
-    # Eine Kopie erstellen und die obere Dreiecksmatrix sowie die Diagonale ignorieren,
-    # um Duplikate und Selbstkorrelationen zu vermeiden.
-    interpret_matrix = corr_matrix.copy()
-    interpret_matrix.values[np.triu_indices_from(interpret_matrix.values)] = np.nan
+    # Matrix vorbereiten: Kopieren, Typ ändern, Duplikate/Diagonale entfernen
+    corr_unstacked = corr_matrix.copy().astype(float)
+    corr_unstacked.values[np.triu_indices_from(corr_unstacked.values)] = np.nan
+    corr_unstacked = corr_unstacked.unstack().dropna()
 
-    # Stärkste positive Korrelation finden
-    max_corr = interpret_matrix.max().max()
-    positive_text = ""
-    if pd.notna(max_corr) and max_corr >= threshold:
-        max_corr_col = interpret_matrix.max().idxmax()
-        max_corr_row = interpret_matrix[max_corr_col].idxmax()
-        positive_text = f"""
-        📈 **Stärkster positiver Zusammenhang:** Zwischen **{max_corr_row}** und **{max_corr_col}** besteht mit einem Wert von **{max_corr:.2f}** eine deutliche positive Korrelation. 
-        Das bedeutet: Songs in deiner Auswahl, die einen hohen Wert bei '{max_corr_row}' haben, neigen auch dazu, bei '{max_corr_col}' hoch zu punkten. 
-        Ein klassisches Beispiel hierfür ist, dass energiegeladene Songs oft auch sehr tanzbar sind.
-        """
+    # Nach der Stärke der Korrelation (absoluter Wert) sortieren
+    sorted_correlations = corr_unstacked.abs().sort_values(ascending=False)
 
-    # Stärkste negative Korrelation finden
-    min_corr = interpret_matrix.min().min()
-    negative_text = ""
-    if pd.notna(min_corr) and min_corr <= -threshold:
-        min_corr_col = interpret_matrix.min().idxmin()
-        min_corr_row = interpret_matrix[min_corr_col].idxmin()
-        negative_text = f"""
-        📉 **Stärkster negativer Zusammenhang:**
-        Zwischen **{min_corr_row}** und **{min_corr_col}** gibt es mit **{min_corr:.2f}** einen nennenswerten negativen Zusammenhang.
-        Das heißt: Songs, die bei '{min_corr_row}' hoch abschneiden, haben tendenziell niedrigere Werte bei '{min_corr_col}'. 
-        Das könnte zum Beispiel bedeuten, dass Lieder mit hoher Positivität selten ein sehr langsames Tempo haben.
-        """
+    if sorted_correlations.empty:
+        return "Es konnten keine Korrelationen berechnet werden."
 
-    if not positive_text and not negative_text:
-        return "In deiner aktuellen Auswahl gibt es keine besonders starken Zusammenhänge (über +/- 0.4) zwischen den musikalischen Eigenschaften."
+    interpretation_list = []
+    # Die Top 5 stärksten Korrelationen analysieren
+    for index, abs_value in sorted_correlations.head(5).items():
+        var1, var2 = index
+        original_value = corr_matrix.loc[var1, var2]
 
-    return positive_text + "\n" + negative_text
+        # Stärke des Zusammenhangs bestimmen
+        if abs_value >= 0.6:
+            strength = "starker"
+            emoji = "🚀"
+        elif abs_value >= 0.3:
+            strength = "moderater"
+            emoji = "📈"
+        elif abs_value >= 0.15:
+            strength = "leichter"
+            emoji = "🤔"
+        else:
+            continue # Ignoriere sehr schwache Korrelationen
+
+        # Richtung des Zusammenhangs bestimmen
+        if original_value > 0:
+            direction = "positiver"
+            explanation = f"Wenn **{var1}** steigt, neigt auch **{var2}** dazu zu steigen."
+        else:
+            direction = "negativer"
+            explanation = f"Wenn **{var1}** steigt, neigt **{var2}** dazu zu fallen."
+
+        # Formatierten Text zur Liste hinzufügen
+        interpretation_list.append(
+            f"* **{var1} & {var2}** (Wert: `{original_value:.2f}`): "
+            f"Ein **{strength} {direction} Zusammenhang**. {emoji} {explanation}"
+        )
+
+    if not interpretation_list:
+        return "In dieser Auswahl gibt es keine nennenswerten Zusammenhänge (Korrelation > 0.2)."
+
+    return "\n".join(interpretation_list)
 
 # --- SEITEN DEFINITIONEN ---
 
@@ -430,7 +444,7 @@ def explorer_page(df_explorer):
                 st.markdown("---")
                 st.subheader("Interpretation der Zusammenhänge")
                 # Ruft die neue Funktion auf und zeigt den Text an
-                interpretation = interpret_correlation(corr_matrix)
+               interpretation = interpret_correlation_detailed(corr_matrix)
                 st.markdown(interpretation)
                 # --- ENDE DER NEUEN INTERPRETATION ---
             else:
