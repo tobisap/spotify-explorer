@@ -195,59 +195,47 @@ def save_highscores(scores):
     with open(HIGHSCORE_FILE, 'w') as f:
         json.dump(scores, f, indent=4)
 
-def interpret_correlation_detailed(corr_matrix):
+def get_top_correlations(corr_matrix, num_results=4):
     """
-    Analysiert eine Korrelationsmatrix und gibt eine detaillierte,
-    textliche Interpretation mehrerer Zusammenhänge als Liste zurück.
+    Findet die stärksten Korrelationen und gibt sie als eine Liste von
+    Wörterbüchern für die Darstellung in Kacheln zurück.
     """
-    # Matrix vorbereiten: Kopieren, Typ ändern, Duplikate/Diagonale entfernen
+    # Matrix vorbereiten
     corr_unstacked = corr_matrix.copy().astype(float)
     corr_unstacked.values[np.triu_indices_from(corr_unstacked.values)] = np.nan
     corr_unstacked = corr_unstacked.unstack().dropna()
 
-    # Nach der Stärke der Korrelation (absoluter Wert) sortieren
+    # Nach der Stärke der Korrelation sortieren
     sorted_correlations = corr_unstacked.abs().sort_values(ascending=False)
 
     if sorted_correlations.empty:
-        return "Es konnten keine Korrelationen berechnet werden."
+        return []
 
-    interpretation_list = []
-    # Die Top 5 stärksten Korrelationen analysieren
-    for index, abs_value in sorted_correlations.head(5).items():
+    top_correlations = []
+    # Die Top-Korrelationen analysieren
+    for index, abs_value in sorted_correlations.head(num_results).items():
         var1, var2 = index
         original_value = corr_matrix.loc[var1, var2]
 
-        # Stärke des Zusammenhangs bestimmen
-        if abs_value >= 0.6:
-            strength = "starker"
-            emoji = "🚀"
-        elif abs_value >= 0.3:
-            strength = "moderater"
-            emoji = "📈"
-        elif abs_value >= 0.15:
-            strength = "leichter"
-            emoji = "🤔"
-        else:
-            continue # Ignoriere sehr schwache Korrelationen
+        # Stärke bestimmen
+        if abs_value >= 0.6: strength = "Stark"
+        elif abs_value >= 0.4: strength = "Moderat"
+        else: strength = "Leicht"
 
-        # Richtung des Zusammenhangs bestimmen
-        if original_value > 0:
-            direction = "positiver"
-            explanation = f"Wenn **{var1}** steigt, neigt auch **{var2}** dazu zu steigen."
-        else:
-            direction = "negativer"
-            explanation = f"Wenn **{var1}** steigt, neigt **{var2}** dazu zu fallen."
+        # Richtung und Emoji bestimmen
+        direction = "Positiv" if original_value > 0 else "Negativ"
+        emoji = "📈" if original_value > 0 else "📉"
+        
+        if abs_value < 0.2: continue # Sehr schwache Korrelationen überspringen
 
-        # Formatierten Text zur Liste hinzufügen
-        interpretation_list.append(
-            f"* **{var1} & {var2}** (Wert: `{original_value:.2f}`): "
-            f"Ein **{strength} {direction} Zusammenhang**. {emoji} {explanation}"
-        )
-
-    if not interpretation_list:
-        return "In dieser Auswahl gibt es keine nennenswerten Zusammenhänge (Korrelation > 0.2)."
-
-    return "\n".join(interpretation_list)
+        # Daten für die Kachel speichern
+        top_correlations.append({
+            "label": f"{emoji} {var1} & {var2}",
+            "value": f"{original_value:.2f}",
+            "delta": f"{strength} {direction}"
+        })
+            
+    return top_correlations
 
 # --- SEITEN DEFINITIONEN ---
 
@@ -441,10 +429,24 @@ def explorer_page(df_explorer):
                 st.plotly_chart(fig_corr, use_container_width=True)
                 
                 # --- INTERPRETATION HINZUGEFÜGT ---
-                st.subheader("Interpretation der Zusammenhänge")
-                # Ruft die neue Funktion auf und zeigt den Text an
-                interpretation = interpret_correlation_detailed(corr_matrix)
-                st.markdown(interpretation)
+                st.subheader("Wichtigste Zusammenhänge")
+
+                # --- NEUE KACHEL-DARSTELLUNG ---
+                top_corrs = get_top_correlations(corr_matrix, num_results=4)
+
+                if top_corrs:
+                    # Erstellt so viele Spalten, wie Ergebnisse vorhanden sind (max. 4)
+                    cols = st.columns(len(top_corrs))
+                    for i, corr_data in enumerate(top_corrs):
+                        with cols[i]:
+                            st.metric(
+                                label=corr_data["label"],
+                                value=corr_data["value"],
+                                delta=corr_data["delta"],
+                                delta_color="off" # Verwendet Standardfarbe für den Text
+                            )
+                else:
+                    st.write("In dieser Auswahl gibt es keine nennenswerten Zusammenhänge.")
                 # --- ENDE INTERPRETATION ---
             else:
                 st.warning("Nicht genügend Daten vorhanden, um eine Korrelationsmatrix zu erstellen.")
