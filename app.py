@@ -392,7 +392,8 @@ def explorer_page(df_explorer):
                 st.metric(label="Jahr 📅", value=f"{selected_song.get('year', 'N/A')}")
 
         st.markdown("---")
-        
+
+        st.json({'Anzahl Songs': len(filtered_df), 'Ø Energie': filtered_df['energy'].mean()})
         # --- NEUE REGELBASIERTE INTERPRETATION ---
         interpretation_text = generate_interpretation(filtered_df)
         st.info(f"**Interpretation deiner Auswahl:** {interpretation_text}")
