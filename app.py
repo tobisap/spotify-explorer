@@ -155,6 +155,10 @@ def load_data():
             df[col] = pd.to_numeric(df[col], errors='coerce')
     df.dropna(subset=numeric_cols, inplace=True)
 
+    if 'energy' in df.columns:
+        # Skaliert Werte, die zwischen 0 und 1 liegen, auf eine 0-100 Skala
+        df.loc[(df['energy'] >= 0) & (df['energy'] <= 1), 'energy'] *= 100
+    
     if 'year' in df.columns:
         df['year'] = df['year'].astype(int)
         df['decade'] = (df['year'] // 10) * 10
