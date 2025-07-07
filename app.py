@@ -294,29 +294,6 @@ def explorer_page(df_explorer):
         col2.metric("Ø Energie", f"{filtered_df['energy'].mean():.2f}")
         col3.metric("Ø Positivität", f"{filtered_df['valence'].mean():.2f}")
 
-        st.markdown("---") # Trennlinie
-        
-    # --- NEUE GEMINI INTEGRATION START ---
-    if st.button("✨ Ergebnisse mit Gemini interpretieren"):
-        # Erstellen eines aussagekräftigen Prompts für Gemini
-        prompt = f"""
-        Du bist ein musikbegeisterter Datenanalyst. Interpretiere die folgende Auswahl an Spotify-Songs kurz und prägnant in 2-3 Sätzen.
-        Sei locker und sprich den Nutzer direkt an (Du-Form).
-
-        **Analyse-Daten:**
-        - Anzahl der gefundenen Songs: {len(filtered_df)}
-        - Ausgewählter Zeitraum (Jahrzehnte): {start_decade_str} bis {end_decade_str}
-        - Durchschnittliche Energie: {avg_energy:.2f}
-        - Durchschnittliche Positivität (Valence): {avg_valence:.2f}
-            
-        Gib eine kurze, unterhaltsame Interpretation dieser Auswahl. Was könnte das über die Musik aussagen?
-        """
-            
-        with st.spinner("Gemini analysiert die Ergebnisse..."):
-            interpretation = get_gemini_interpretation(prompt)
-            st.info(interpretation)
-        # --- NEUE GEMINI INTEGRATION ENDE ---
-        
         # --- Interaktive Grafiken etc. ---
         st.markdown("<br>", unsafe_allow_html=True)
         st.subheader("Dynamische Analyse")
