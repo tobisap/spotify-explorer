@@ -176,6 +176,52 @@ def load_data():
 
 df = load_data()
 
+def generate_interpretation(df):
+    """
+    Generiert eine regelbasierte Text-Interpretation für einen DataFrame von Songs.
+    """
+    if df.empty:
+        return "Bitte wähle zuerst Songs über die Filter aus."
+
+    # Berechne die Durchschnittswerte (Annahme: Skala von 0-100)
+    avg_energy = df['energy'].mean()
+    avg_valence = df['valence'].mean()
+    avg_danceability = df['danceability'].mean() / 10 # Skalierung von 0-1000 auf 0-100
+
+    # Teil 1: Energie interpretieren
+    if avg_energy > 70:
+        energy_desc = "sehr energiegeladenen Tracks"
+    elif avg_energy < 40:
+        energy_desc = "eher ruhigen und entspannten Songs"
+    else:
+        energy_desc = "Songs mit einer ausgewogenen Energie"
+
+    # Teil 2: Stimmungs-Analyse (Valence)
+    if avg_valence > 70:
+        valence_desc = "einer ausgesprochen positiven und fröhlichen Stimmung"
+    elif avg_valence < 40:
+        valence_desc = "einer eher melancholischen oder nachdenklichen Atmosphäre"
+    else:
+        valence_desc = "einer ausbalancierten Grundstimmung"
+
+    # Teil 3: Persona basierend auf der Kombination
+    persona = ""
+    if avg_energy > 65 and avg_valence > 65:
+        persona = "Das ist der perfekte Mix für eine Party! 🥳"
+    elif avg_energy > 65 and avg_valence < 40:
+        persona = "Ideal für ein intensives Workout oder wenn du dich auf etwas konzentrieren musst. 💪"
+    elif avg_energy < 40 and avg_valence < 40:
+        persona = "Die perfekte Auswahl für einen gemütlichen Abend oder einen regnerischen Tag. 🌧️"
+    elif avg_energy < 40 and avg_valence > 65:
+        persona = "Das klingt nach entspanntem Genuss am Sonntagmorgen. ☀️"
+
+    # Finale Zusammenfassung
+    final_text = (
+        f"Deine Auswahl deutet auf eine Vorliebe für **{energy_desc}** mit **{valence_desc}** hin. "
+        f"{persona}"
+    )
+    return final_text
+    
 # --- HIGHSCORE FUNKTIONEN ---
 HIGHSCORE_FILE = "highscores.json"
 
@@ -294,6 +340,14 @@ def explorer_page(df_explorer):
         col2.metric("Ø Energie", f"{filtered_df['energy'].mean():.2f}")
         col3.metric("Ø Positivität", f"{filtered_df['valence'].mean():.2f}")
 
+        st.markdown("---") 
+        
+        # --- NEUE REGELBASIERTE INTERPRETATION ---
+        # Der Gemini-Button wird entfernt und durch diesen Block ersetzt:
+        interpretation_text = generate_interpretation(filtered_df)
+        st.info(f"**Interpretation deiner Auswahl:** {interpretation_text}")
+        # --- ENDE DER NEUEN INTERPRETATION ---
+        
         # --- Interaktive Grafiken etc. ---
         st.markdown("<br>", unsafe_allow_html=True)
         st.subheader("Dynamische Analyse")
