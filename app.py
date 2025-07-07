@@ -128,6 +128,15 @@ h1 {
     white-space: normal; /* Erlaubt den Textumbruch */
     line-height: 1.4;    /* Verbessert den Zeilenabstand für bessere Lesbarkeit */
 }
+/* Stellt sicher, dass alle Kacheln in einer Reihe die gleiche Höhe haben */
+[data-testid="stHorizontalBlock"] > div {
+    display: flex;
+    flex-direction: column;
+}
+
+[data-testid="stHorizontalBlock"] > div > [data-testid="stMetric"] {
+    flex-grow: 1;
+}
 </style>
 """
 st.markdown(spotify_dark_mode_css, unsafe_allow_html=True)
