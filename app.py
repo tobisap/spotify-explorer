@@ -123,6 +123,11 @@ h1 {
     border: none;
     box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
+/* Zusätzlicher Code für den Textumbruch in den Metrik-Kacheln */
+[data-testid="stMetric"] [data-testid="stMetricDelta"] > div {
+    white-space: normal; /* Erlaubt den Textumbruch */
+    line-height: 1.4;    /* Verbessert den Zeilenabstand für bessere Lesbarkeit */
+}
 </style>
 """
 st.markdown(spotify_dark_mode_css, unsafe_allow_html=True)
