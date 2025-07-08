@@ -4,8 +4,6 @@ import plotly.express as px
 import json
 import os
 import numpy as np
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
 
 # --- Konfiguration & Design ---
 st.set_page_config(
@@ -136,79 +134,52 @@ st.markdown(spotify_dark_mode_css, unsafe_allow_html=True)
 
 # --- DATENLADEN ---
 @st.cache_data
-
-@st.cache_data(ttl="6h") # Nur dieser eine Dekorator bleibt!
 def load_data():
-    """Lädt Song-Daten und Audio-Features direkt von der Spotify-API."""
+    """Lädt die Parquet-Datei."""
     try:
-        # Authentifizierung mit den Secrets
-        auth_manager = SpotifyClientCredentials(
-            client_id=st.secrets["SPOTIPY_CLIENT_ID"],
-            client_secret=st.secrets["SPOTIPY_CLIENT_SECRET"]
-        )
-        sp = spotipy.Spotify(auth_manager=auth_manager)
-
-        # ID einer großen, öffentlichen Playlist (z.B. Today's Top Hits)
-        playlist_id = '37i9dQZF1DXcBWIGoYBM5M'
-        
-        all_tracks = []
-        # Ergebnisse sind paginiert (meist 100 pro Seite), daher die Schleife
-        results = sp.playlist_tracks(playlist_id)
-        tracks = results['items']
-        
-        while results['next']:
-            results = sp.next(results)
-            tracks.extend(results['items'])
-
-        # Sammle alle relevanten Track-Informationen
-        for item in tracks:
-            track = item.get('track')
-            if not track or not track.get('id'):
-                continue
-
-            all_tracks.append({
-                'id': track['id'],
-                'name': track['name'],
-                'popularity': track['popularity'],
-                'link': track['external_urls'].get('spotify', ''),
-                'artists': ", ".join([artist['name'] for artist in track['artists']])
-            })
-            
-        if not all_tracks:
-            st.error("Keine Tracks in der Playlist gefunden.")
-            return pd.DataFrame()
-
-        # Erstelle einen DataFrame aus den gesammelten Infos
-        df = pd.DataFrame(all_tracks)
-        df.rename(columns={'artists': 'display_artists'}, inplace=True)
-
-        # Hole die Audio-Features für alle Tracks (in Blöcken von 100)
-        all_features = []
-        for i in range(0, len(df['id']), 100):
-            batch = df['id'][i:i+100]
-            features_results = sp.audio_features(batch)
-            all_features.extend(f for f in features_results if f)
-
-        df_features = pd.DataFrame(all_features)
-        
-        # Führe die beiden DataFrames zusammen
-        df_full = pd.merge(df, df_features, on='id', how='inner')
-
-        # Datenbereinigung und Anpassung an das erwartete Format
-        df_full['year'] = pd.to_datetime(df_full.get('release_date', pd.NaT)).dt.year
-        df_full['decade'] = (df_full['year'] // 10) * 10
-        df_full['duration_s'] = df_full['duration_ms'] / 1000
-
-        # Skaliere 0-1 Werte auf 0-100
-        for col in ['danceability', 'energy', 'valence']:
-            if col in df_full.columns:
-                df_full[col] *= 100
-        
-        return df_full
-
-    except Exception as e:
-        st.error(f"Fehler bei der Verbindung zur Spotify-API: {e}")
+        df = pd.read_parquet('data_final.parquet')
+    except FileNotFoundError:
+        st.error("FEHLER: Die Datei 'data_final.parquet' wurde nicht gefunden.")
         return None
+
+    # Sicherstellen, dass die Link-Spalte existiert (t oder Link)
+    if 't' in df.columns:
+        df.rename(columns={'t': 'link'}, inplace=True)
+    elif 'Link' in df.columns:
+        df.rename(columns={'Link': 'link'}, inplace=True)
+    else:
+        # Fallback, falls keine der Spalten da ist
+        st.error("FEHLER: Weder 't' noch 'Link' als Spalte für den Spotify-Track gefunden.")
+        return None
+        
+    df.dropna(subset=['link'], inplace=True) # Songs ohne Link entfernen
+
+    numeric_cols = ['year', 'danceability', 'popularity', 'tempo', 'energy', 'valence', 'duration_ms']
+    for col in numeric_cols:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+    df.dropna(subset=numeric_cols, inplace=True)
+
+    if 'energy' in df.columns:
+        # Skaliert Werte, die zwischen 0 und 1 liegen, auf eine 0-100 Skala
+        df.loc[(df['energy'] >= 0) & (df['energy'] <= 1), 'energy'] *= 100
+    
+    if 'year' in df.columns:
+        df['year'] = df['year'].astype(int)
+        df['decade'] = (df['year'] // 10) * 10
+        
+    if 'artists' in df.columns:
+        df['display_artists'] = df['artists'].str.replace(r"\[|\]|'", "", regex=True)
+    else:
+        df['display_artists'] = "N/A"
+        
+    if 'duration_ms' in df.columns:
+        df['duration_s'] = df['duration_ms'] / 1000
+        df.dropna(subset=['duration_s'], inplace=True)
+        
+    return df
+
+df = load_data()
     
 # --- HIGHSCORE FUNKTIONEN ---
 HIGHSCORE_FILE = "highscores.json"
@@ -325,10 +296,16 @@ def explorer_page(df_explorer):
         min_value=0, max_value=100, value=(0, 100)
     )
 
-    # Filter direkt auf der 0-100 Skala anwenden
+    # Wende die Skalierungsformel an, um die Daten auf den 0-100 Bereich zu bringen
+    scaled_danceability = (filtered_df['danceability'] / 1_000) * 100
+
+    # NEU: Werte, die über 100 liegen, auf 100 setzen
+    scaled_danceability = scaled_danceability.clip(upper=100)
+
+    # Führe den Filter auf den skalierten und begrenzten Werten durch
     filtered_df = filtered_df[
-        (filtered_df['danceability'] >= dance_range[0]) & 
-        (filtered_df['danceability'] <= dance_range[1])
+        (scaled_danceability >= dance_range[0]) & 
+        (scaled_danceability <= dance_range[1])
     ]
 
     popularity_range = st.sidebar.slider(
