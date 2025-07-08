@@ -4,6 +4,8 @@ import plotly.express as px
 import json
 import os
 import numpy as np
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
 
 # --- Konfiguration & Design ---
 st.set_page_config(
@@ -134,8 +136,6 @@ st.markdown(spotify_dark_mode_css, unsafe_allow_html=True)
 
 # --- DATENLADEN ---
 @st.cache_data
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
 
 @st.cache_data(ttl="6h") # Cache für 6 Stunden, um die API zu schonen
 def load_data():
