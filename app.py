@@ -137,7 +137,7 @@ st.markdown(spotify_dark_mode_css, unsafe_allow_html=True)
 # --- DATENLADEN ---
 @st.cache_data
 
-@st.cache_data(ttl="6h") # Cache für 6 Stunden, um die API zu schonen
+@st.cache_data(ttl="6h") # Nur dieser eine Dekorator bleibt!
 def load_data():
     """Lädt Song-Daten und Audio-Features direkt von der Spotify-API."""
     try:
@@ -325,16 +325,10 @@ def explorer_page(df_explorer):
         min_value=0, max_value=100, value=(0, 100)
     )
 
-    # Wende die Skalierungsformel an, um die Daten auf den 0-100 Bereich zu bringen
-    scaled_danceability = (filtered_df['danceability'] / 1_000) * 100
-
-    # NEU: Werte, die über 100 liegen, auf 100 setzen
-    scaled_danceability = scaled_danceability.clip(upper=100)
-
-    # Führe den Filter auf den skalierten und begrenzten Werten durch
+    # Filter direkt auf der 0-100 Skala anwenden
     filtered_df = filtered_df[
-        (scaled_danceability >= dance_range[0]) & 
-        (scaled_danceability <= dance_range[1])
+        (filtered_df['danceability'] >= dance_range[0]) & 
+        (filtered_df['danceability'] <= dance_range[1])
     ]
 
     popularity_range = st.sidebar.slider(
